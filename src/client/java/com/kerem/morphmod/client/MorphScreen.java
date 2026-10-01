@@ -4,6 +4,7 @@ import com.kerem.morphmod.network.MorphRequestPayload;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -15,21 +16,26 @@ import net.minecraft.world.entity.LivingEntity;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 /**
  * The Morph selection screen.
- * Displays a scrollable grid of all collected morphs, each rendered
- * as a miniature entity. Clicking on a morph activates the transformation.
+ * Displays a searchable, scrollable grid of all collected morphs, each rendered
+ * as a miniature animated entity. Clicking on a morph activates the transformation.
  */
 public class MorphScreen extends Screen {
     private static final int CELL_SIZE = 64;
     private static final int CELL_PADDING = 8;
     private static final int COLUMNS = 6;
-    private static final int HEADER_HEIGHT = 45;
-    private static final int FOOTER_HEIGHT = 45;
+    private static final int HEADER_HEIGHT = 58;
+    private static final int FOOTER_HEIGHT = 42;
 
-    private final List<ResourceLocation> morphList = new ArrayList<>();
+    private final List<ResourceLocation> allMorphList = new ArrayList<>();
+    private final List<ResourceLocation> displayedMorphList = new ArrayList<>();
+
+    private EditBox searchBox;
+    private String currentSearch = "";
     private int scrollOffset = 0;
     private int maxScroll = 0;
 
@@ -41,21 +47,31 @@ public class MorphScreen extends Screen {
     protected void init() {
         super.init();
 
-        // Load collected morphs
-        morphList.clear();
+        // Load all collected morphs
+        allMorphList.clear();
         Set<ResourceLocation> morphs = ClientMorphData.getCollectedMorphs();
-        morphList.addAll(morphs);
+        allMorphList.addAll(morphs);
 
-        // Calculate scrolling bounds
-        int totalRows = (int) Math.ceil((double) morphList.size() / COLUMNS);
-        int gridHeight = totalRows * (CELL_SIZE + CELL_PADDING);
-        int availableHeight = this.height - HEADER_HEIGHT - FOOTER_HEIGHT;
-        maxScroll = Math.max(0, gridHeight - availableHeight);
+        // Search box in header
+        int searchWidth = 170;
+        int searchHeight = 16;
+        int searchX = (this.width - searchWidth) / 2;
+        int searchY = 20;
+
+        searchBox = new EditBox(this.font, searchX, searchY, searchWidth, searchHeight, Component.translatable("morphmod.screen.search"));
+        searchBox.setHint(Component.translatable("morphmod.screen.search_hint"));
+        searchBox.setMaxLength(32);
+        searchBox.setValue(currentSearch);
+        searchBox.setResponder(this::onSearchQueryChanged);
+        this.addRenderableWidget(searchBox);
+
+        // Filter morph list based on existing or initial query
+        updateFilteredList();
 
         // "Return to Normal" button centered at the bottom
         int buttonWidth = 200;
         int buttonX = (this.width - buttonWidth) / 2;
-        int buttonY = this.height - 32;
+        int buttonY = this.height - 30;
 
         this.addRenderableWidget(Button.builder(
                 Component.translatable("morphmod.screen.return_normal"),
@@ -67,6 +83,73 @@ public class MorphScreen extends Screen {
         ).bounds(buttonX, buttonY, buttonWidth, 20).build());
     }
 
+    private void onSearchQueryChanged(String query) {
+        this.currentSearch = query;
+        this.scrollOffset = 0;
+        updateFilteredList();
+    }
+
+    private void updateFilteredList() {
+        displayedMorphList.clear();
+        for (ResourceLocation id : allMorphList) {
+            if (matchesSearch(id, currentSearch)) {
+                displayedMorphList.add(id);
+            }
+        }
+
+        // Calculate scrolling bounds
+        int totalRows = (int) Math.ceil((double) displayedMorphList.size() / COLUMNS);
+        int gridHeight = totalRows * (CELL_SIZE + CELL_PADDING);
+        int availableHeight = this.height - HEADER_HEIGHT - FOOTER_HEIGHT;
+        maxScroll = Math.max(0, gridHeight - availableHeight);
+        scrollOffset = Math.min(scrollOffset, maxScroll);
+    }
+
+    private boolean matchesSearch(ResourceLocation morphId, String query) {
+        if (query == null || query.isBlank()) {
+            return true;
+        }
+        String q = query.trim().toLowerCase(Locale.ROOT);
+
+        // Match entity registry id path (e.g. "creeper", "iron_golem")
+        String path = morphId.getPath().toLowerCase(Locale.ROOT);
+        if (path.contains(q)) {
+            return true;
+        }
+
+        // Match localized name (e.g. "Creeper", "Demir Golem", "İnek")
+        EntityType<?> entityType = BuiltInRegistries.ENTITY_TYPE.get(morphId);
+        if (entityType != null) {
+            String name = entityType.getDescription().getString().toLowerCase(Locale.ROOT);
+            if (name.contains(q)) {
+                return true;
+            }
+
+            // Normalization for Turkish/English character variations
+            String normName = normalize(name);
+            String normQ = normalize(q);
+            if (normName.contains(normQ)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static String normalize(String s) {
+        return s.replace('ı', 'i')
+                .replace('İ', 'i')
+                .replace('ş', 's')
+                .replace('Ş', 's')
+                .replace('ç', 'c')
+                .replace('Ç', 'c')
+                .replace('ğ', 'g')
+                .replace('Ğ', 'g')
+                .replace('ö', 'o')
+                .replace('Ö', 'o')
+                .replace('ü', 'u')
+                .replace('Ü', 'u');
+    }
+
     @Override
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         // Crisp, sleek dark gradient background without blur shader
@@ -74,15 +157,24 @@ public class MorphScreen extends Screen {
 
         // ─── Header ──────────────────────────────────────────────
         // Title
-        guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 12, 0xFFD700);
+        guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 7, 0xFFD700);
 
-        // Morph count
-        guiGraphics.drawCenteredString(
-                this.font,
-                Component.translatable("morphmod.screen.count", morphList.size()),
-                this.width / 2, 26,
-                0xAAAAAA
-        );
+        // Count info
+        if (currentSearch.isEmpty()) {
+            guiGraphics.drawCenteredString(
+                    this.font,
+                    Component.translatable("morphmod.screen.count", allMorphList.size()),
+                    this.width / 2, 40,
+                    0xAAAAAA
+            );
+        } else {
+            guiGraphics.drawCenteredString(
+                    this.font,
+                    Component.translatable("morphmod.screen.count_filtered", displayedMorphList.size(), allMorphList.size()),
+                    this.width / 2, 40,
+                    0xAAAAAA
+            );
+        }
 
         // Decorative separator line
         int gridStartX = (this.width - (COLUMNS * (CELL_SIZE + CELL_PADDING))) / 2;
@@ -93,10 +185,17 @@ public class MorphScreen extends Screen {
         int gridStartY = HEADER_HEIGHT;
         int availableHeight = this.height - HEADER_HEIGHT - FOOTER_HEIGHT;
 
+        if (displayedMorphList.isEmpty()) {
+            Component emptyMsg = allMorphList.isEmpty()
+                    ? Component.translatable("morphmod.screen.empty", "Henüz mob ruhu toplamadın!")
+                    : Component.translatable("morphmod.screen.no_results");
+            guiGraphics.drawCenteredString(this.font, emptyMsg, this.width / 2, gridStartY + 35, 0xFFAAAA);
+        }
+
         // Enable scissor to clip scrolling content
         guiGraphics.enableScissor(0, gridStartY, this.width, gridStartY + availableHeight);
 
-        for (int i = 0; i < morphList.size(); i++) {
+        for (int i = 0; i < displayedMorphList.size(); i++) {
             int col = i % COLUMNS;
             int row = i / COLUMNS;
 
@@ -108,7 +207,7 @@ public class MorphScreen extends Screen {
                 continue;
             }
 
-            ResourceLocation morphId = morphList.get(i);
+            ResourceLocation morphId = displayedMorphList.get(i);
             boolean isActive = morphId.equals(ClientMorphData.getActiveMorph());
             boolean isHovered = mouseX >= cellX && mouseX < cellX + CELL_SIZE
                     && mouseY >= cellY && mouseY < cellY + CELL_SIZE
@@ -200,12 +299,12 @@ public class MorphScreen extends Screen {
             guiGraphics.fill(scrollBarX, thumbY, scrollBarX + 4, thumbY + thumbHeight, 0xAAFFD700);
         }
 
-        // ─── Render Widgets / Buttons ───────────────────────────
+        // ─── Render Widgets / Buttons & SearchBox ─────────────────
         // Calls Screen.render which only renders widgets because renderBackground is overridden to no-op
         super.render(guiGraphics, mouseX, mouseY, partialTick);
 
         // ─── Tooltip on hover (rendered last so it's always on top) ─────────
-        for (int i = 0; i < morphList.size(); i++) {
+        for (int i = 0; i < displayedMorphList.size(); i++) {
             int col = i % COLUMNS;
             int row = i / COLUMNS;
             int cellX = gridStartX + col * (CELL_SIZE + CELL_PADDING);
@@ -215,7 +314,7 @@ public class MorphScreen extends Screen {
                     && mouseY >= cellY && mouseY < cellY + CELL_SIZE
                     && mouseY >= gridStartY && mouseY < gridStartY + availableHeight) {
 
-                ResourceLocation morphId = morphList.get(i);
+                ResourceLocation morphId = displayedMorphList.get(i);
                 EntityType<?> entityType = BuiltInRegistries.ENTITY_TYPE.get(morphId);
                 if (entityType != null) {
                     List<Component> tooltip = new ArrayList<>();
@@ -293,7 +392,7 @@ public class MorphScreen extends Screen {
             int availableHeight = this.height - HEADER_HEIGHT - FOOTER_HEIGHT;
 
             if (mouseY >= gridStartY && mouseY < gridStartY + availableHeight) {
-                for (int i = 0; i < morphList.size(); i++) {
+                for (int i = 0; i < displayedMorphList.size(); i++) {
                     int col = i % COLUMNS;
                     int row = i / COLUMNS;
 
@@ -304,7 +403,7 @@ public class MorphScreen extends Screen {
                             && mouseY >= cellY && mouseY < cellY + CELL_SIZE) {
 
                         // Send morph request to server
-                        ResourceLocation morphId = morphList.get(i);
+                        ResourceLocation morphId = displayedMorphList.get(i);
                         ClientPlayNetworking.send(new MorphRequestPayload(morphId.toString()));
                         this.onClose();
                         return true;
@@ -314,6 +413,28 @@ public class MorphScreen extends Screen {
         }
 
         return super.mouseClicked(mouseX, mouseY, button);
+    }
+
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (this.searchBox != null && this.searchBox.keyPressed(keyCode, scanCode, modifiers)) {
+            return true;
+        }
+        if (this.searchBox != null && this.searchBox.isFocused()) {
+            if (keyCode == 256) { // ESC clears focus
+                this.searchBox.setFocused(false);
+                return true;
+            }
+        }
+        return super.keyPressed(keyCode, scanCode, modifiers);
+    }
+
+    @Override
+    public boolean charTyped(char codePoint, int modifiers) {
+        if (this.searchBox != null && this.searchBox.charTyped(codePoint, modifiers)) {
+            return true;
+        }
+        return super.charTyped(codePoint, modifiers);
     }
 
     @Override

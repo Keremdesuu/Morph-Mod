@@ -30,6 +30,11 @@ public class MorphMod implements ModInitializer {
         MorphAbilityHandler.register();
         com.kerem.morphmod.event.ActiveAbilityHandler.register();
 
+        // Register commands
+        net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback.EVENT.register(
+                (dispatcher, registryAccess, environment) -> com.kerem.morphmod.command.MorphCommand.register(dispatcher)
+        );
+
         // Sync morph data when player joins
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
             server.execute(() -> {

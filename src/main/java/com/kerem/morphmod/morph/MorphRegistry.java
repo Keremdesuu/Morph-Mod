@@ -190,6 +190,20 @@ public class MorphRegistry {
         return REGISTRY.containsKey(type);
     }
 
+    /**
+     * Gets all registered morph ResourceLocations.
+     */
+    public static Set<ResourceLocation> getAllMorphIds() {
+        java.util.Set<ResourceLocation> ids = new java.util.LinkedHashSet<>();
+        for (EntityType<?> type : REGISTRY.keySet()) {
+            ResourceLocation id = BuiltInRegistries.ENTITY_TYPE.getKey(type);
+            if (id != null) {
+                ids.add(id);
+            }
+        }
+        return ids;
+    }
+
     public static int getHealth(EntityType<?> type) {
         MorphEntry entry = REGISTRY.get(type);
         return entry != null ? entry.health() : 20;
