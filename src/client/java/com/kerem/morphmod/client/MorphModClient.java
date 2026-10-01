@@ -28,6 +28,9 @@ public class MorphModClient implements ClientModInitializer {
                     context.client().execute(() -> {
                         ClientMorphData.setCollectedMorphs(payload.morphIds());
                         ClientMorphData.setActiveMorph(payload.activeMorphId());
+                        if (context.client().player != null) {
+                            context.client().player.refreshDimensions();
+                        }
                     });
                 }
         );
@@ -44,6 +47,7 @@ public class MorphModClient implements ClientModInitializer {
                         if (context.client().player != null
                                 && context.client().player.getUUID().equals(playerId)) {
                             ClientMorphData.setActiveMorph(payload.morphId());
+                            context.client().player.refreshDimensions();
                         }
                     });
                 }

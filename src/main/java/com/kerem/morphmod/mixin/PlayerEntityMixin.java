@@ -15,8 +15,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
- * Mixin into Player to modify the player's bounding box dimensions
- * when morphed into another entity type.
+ * Server-side mixin to adapt the player's bounding box dimensions to match their active morph.
+ * Clamps dimensions to playable bounds so the player never gets stuck inside blocks.
  */
 @Mixin(Player.class)
 public abstract class PlayerEntityMixin {
@@ -34,9 +34,15 @@ public abstract class PlayerEntityMixin {
                 EntityType<?> entityType = BuiltInRegistries.ENTITY_TYPE.get(morphId);
 
                 if (entityType != null) {
-                    // Use the morph entity's default dimensions
-                    EntityDimensions morphDimensions = entityType.getDimensions();
-                    cir.setReturnValue(morphDimensions);
+                    EntityDimensions defaultDims = entityType.getDimensions();
+                    // Clamp gigantic hitboxes to playable bounds so player doesn't get stuck in walls
+                    float width = Math.min(defaultDims.width(), 1.2F);
+                    float height = Math.min(defaultDims.height(), 2.4F);
+                    width = Math.max(width, 0.4F);
+                    height = Math.max(height, 0.5F);
+
+                    float eyeHeight = Math.min(defaultDims.eyeHeight(), height * 0.85F);
+                    cir.setReturnValue(EntityDimensions.scalable(width, height).withEyeHeight(eyeHeight));
                 }
             }
         }

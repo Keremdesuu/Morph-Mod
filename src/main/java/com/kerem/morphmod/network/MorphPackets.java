@@ -70,12 +70,16 @@ public class MorphPackets {
 
             // Security check: verify the player actually has this morph
             if (data.hasMorph(morphId)) {
+                // Reset previous morph abilities
+                MorphAbilityHandler.resetAbilities(player);
+
                 manager.setActiveMorph(player.getUUID(), morphId);
 
-                // Apply morph health
+                // Apply morph health and abilities
                 EntityType<?> entityType = BuiltInRegistries.ENTITY_TYPE.get(morphId);
                 if (entityType != null) {
                     MorphAbilityHandler.applyMorphHealth(player, entityType);
+                    MorphAbilityHandler.applyAbilities(player, entityType);
                 }
 
                 // Refresh player dimensions to match morph

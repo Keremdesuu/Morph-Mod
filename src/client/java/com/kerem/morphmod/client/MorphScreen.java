@@ -69,8 +69,8 @@ public class MorphScreen extends Screen {
 
     @Override
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        // Dark semi-transparent background
-        this.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
+        // Crisp, sleek dark gradient background without blur shader
+        guiGraphics.fillGradient(0, 0, this.width, this.height, 0xD808080C, 0xF0030305);
 
         // ─── Header ──────────────────────────────────────────────
         // Title

@@ -3,7 +3,10 @@
     "package": "com.kerem.morphmod.client.mixin",
     "compatibilityLevel": "JAVA_21",
     "client": [
-        "EntityRenderDispatcherMixin"
+        "EntityRenderDispatcherMixin",
+        "ClientPlayerEntityMixin",
+        "WalkAnimationStateAccessor",
+        "ItemInHandRendererMixin"
     ],
     "injectors": {
         "defaultRequire": 1

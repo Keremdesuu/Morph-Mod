@@ -44,14 +44,25 @@ public class MorphAbilityHandler {
     public static void applyAbilities(ServerPlayer player, EntityType<?> entityType) {
         Set<MorphAbility> abilities = MorphRegistry.getAbilities(entityType);
 
+        // Flight: strictly manage flight so non-flying morphs never retain flight
+        if (!player.isCreative() && !player.isSpectator()) {
+            if (abilities.contains(MorphAbility.FLIGHT)) {
+                if (!player.getAbilities().mayfly) {
+                    player.getAbilities().mayfly = true;
+                    player.onUpdateAbilities();
+                }
+            } else {
+                if (player.getAbilities().mayfly || player.getAbilities().flying) {
+                    player.getAbilities().mayfly = false;
+                    player.getAbilities().flying = false;
+                    player.onUpdateAbilities();
+                }
+            }
+        }
+
         for (MorphAbility ability : abilities) {
             switch (ability) {
-                case FLIGHT -> {
-                    if (!player.getAbilities().mayfly) {
-                        player.getAbilities().mayfly = true;
-                        player.onUpdateAbilities();
-                    }
-                }
+                case FLIGHT -> {}
                 case WATER_BREATHING -> {
                     player.addEffect(new MobEffectInstance(
                             MobEffects.WATER_BREATHING, 60, 0, false, false, true));
