@@ -1,0 +1,36 @@
+{
+    "schemaVersion": 1,
+    "id": "morphmod",
+    "version": "${version}",
+    "name": "Morph Mod",
+    "description": "Transform into any mob you've killed! Collect souls and gain their abilities. Öldürdüğün her mob'a dönüş!",
+    "authors": [
+        "Kerem"
+    ],
+    "contact": {},
+    "license": "MIT",
+    "icon": "assets/morphmod/icon.png",
+    "environment": "*",
+    "entrypoints": {
+        "main": [
+            "com.kerem.morphmod.MorphMod"
+        ],
+        "client": [
+            "com.kerem.morphmod.client.MorphModClient"
+        ]
+    },
+    "mixins": [
+        "morphmod.mixins.json",
+        {
+            "config": "morphmod.client.mixins.json",
+            "environment": "client"
+        }
+    ],
+    "depends": {
+        "fabricloader": ">=0.16.0",
+        "minecraft": "~1.21.1",
+        "java": ">=21",
+        "fabric-api": "*"
+    },
+    "suggests": {}
+}

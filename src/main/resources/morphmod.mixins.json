@@ -1,0 +1,12 @@
+{
+    "required": true,
+    "package": "com.kerem.morphmod.mixin",
+    "compatibilityLevel": "JAVA_21",
+    "mixins": [
+        "PlayerEntityMixin",
+        "LivingEntityMixin"
+    ],
+    "injectors": {
+        "defaultRequire": 1
+    }
+}

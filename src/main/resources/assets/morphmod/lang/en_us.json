@@ -1,0 +1,12 @@
+{
+    "morphmod.soul_collected": "§a✦ Soul Collected: %s §a✦",
+    "morphmod.screen.title": "⚡ Morph Menu ⚡",
+    "morphmod.screen.count": "§7Morphs Collected: §f%d",
+    "morphmod.screen.return_normal": "↩ Return to Normal Form",
+    "morphmod.ability.none": "§cThis mob has no active ability!",
+    "morphmod.ability.cooldown": "§eAbility on cooldown: %ss",
+    "morphmod.ability.no_target": "§cNo target in sight!",
+    "key.morphmod.open_menu": "Open Morph Menu",
+    "key.morphmod.active_ability": "Use Active Ability",
+    "category.morphmod.general": "Morph Mod"
+}
