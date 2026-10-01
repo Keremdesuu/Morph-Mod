@@ -67,13 +67,7 @@ Dönüştüğünüz canlıya göre **`G` tuşuna** basarak benzersiz aktif yeten
 ## 🛠️ Derleme ve Kurulum
 
 ### Gereksinimler:
-- Java 21 LTS
 - Fabric Loader 0.16+
 - Fabric API
 
-### Derleme:
-```bash
-# Projeyi derleyin
-./gradlew build
-```
-Oluşan `.jar` dosyası `build/libs/morphmod-1.0.0.jar` konumundadır. Bu dosyayı `.minecraft/mods` klasörünüze atıp Fabric 1.21.1 ile oynayabilirsiniz!
+Bu dosyayı `.minecraft/mods` klasörünüze atıp Fabric 1.21.1 ile oynayabilirsiniz!
