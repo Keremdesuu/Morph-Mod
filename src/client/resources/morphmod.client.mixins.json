@@ -6,7 +6,8 @@
         "EntityRenderDispatcherMixin",
         "ClientPlayerEntityMixin",
         "WalkAnimationStateAccessor",
-        "ItemInHandRendererMixin"
+        "ItemInHandRendererMixin",
+        "GameRendererMixin"
     ],
     "injectors": {
         "defaultRequire": 1

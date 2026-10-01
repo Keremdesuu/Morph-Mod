@@ -200,7 +200,11 @@ public class MorphScreen extends Screen {
             guiGraphics.fill(scrollBarX, thumbY, scrollBarX + 4, thumbY + thumbHeight, 0xAAFFD700);
         }
 
-        // ─── Tooltip on hover ────────────────────────────────────
+        // ─── Render Widgets / Buttons ───────────────────────────
+        // Calls Screen.render which only renders widgets because renderBackground is overridden to no-op
+        super.render(guiGraphics, mouseX, mouseY, partialTick);
+
+        // ─── Tooltip on hover (rendered last so it's always on top) ─────────
         for (int i = 0; i < morphList.size(); i++) {
             int col = i % COLUMNS;
             int row = i / COLUMNS;
@@ -244,9 +248,31 @@ public class MorphScreen extends Screen {
                 break;
             }
         }
+    }
 
-        // Render buttons (the "Return to Normal" button)
-        super.render(guiGraphics, mouseX, mouseY, partialTick);
+    @Override
+    public void renderBackground(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        // Intentionally empty: prevents Minecraft from applying blur shader or dirt background
+    }
+
+    @Override
+    protected void renderBlurredBackground(float partialTick) {
+        // Overridden to be empty: strictly disable Minecraft post-processing blur shader
+    }
+
+    @Override
+    protected void renderMenuBackground(GuiGraphics guiGraphics) {
+        // Overridden to be empty: disable dirt/tint background
+    }
+
+    @Override
+    protected void renderMenuBackground(GuiGraphics guiGraphics, int x, int y, int width, int height) {
+        // Overridden to be empty: disable dirt/tint background
+    }
+
+    @Override
+    public void renderTransparentBackground(GuiGraphics guiGraphics) {
+        // Overridden to be empty
     }
 
     /**
