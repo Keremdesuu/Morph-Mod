@@ -1,73 +1,76 @@
-# 🎭 Babekon's Morph Mod (Minecraft 1.21.1 Fabric)
+<div align="center">
 
-Minecraft 1.21.1 için geliştirilmiş, klasik Morph deneyimini modern Fabric mimarisiyle yeniden yaşatan kapsamlı dönüşüm modu: **Babekon's Morph Mod**.
+# 🎭 Babekon's Morph Mod
 
-Öldürdüğünüz her canlıdan ruh parçacıkları toplayın, 3D canlı menüden dilediğiniz moba dönüşün ve o mobun hem **pasif** özelliklerine hem de **özel aktif yeteneklerine** sahip olun!
+[![Minecraft Version](https://img.shields.io/badge/Minecraft-1.21.1-brightgreen.svg?style=for-the-badge&logo=minecraft)](https://minecraft.net)
+[![Mod Loader](https://img.shields.io/badge/Loader-Fabric-blue.svg?style=for-the-badge)](https://fabricmc.net)
+[![Version](https://img.shields.io/badge/Version-v2.0.0-orange.svg?style=for-the-badge)](https://github.com/Keremdesuu/Morph-Mod/releases)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
 
----
-
-## ✨ Özellikler
-
-### 👻 Ruh Toplama & Dönüşüm
-- **İlk Öldürme Ödülü:** Bir canlıyı dünyada ilk kez alt ettiğinizde ruh partikülleri uçarak karakterinizin içine girer.
-- **Canlı 3D Arayüz (`-` Eksi Tuşu):** Topladığınız tüm ruhlar Minecraft envanter tarzında 3D animasyonlu modellerle listelenir.
-- **Özellik Uyarlaması:** Dönüştüğünüz mobun canına (kalp sayısı), boyutuna (hitbox) ve hareket kabiliyetine anında bürünürsünüz.
-- **Geri Dönüş:** Tek tıkla normal insan formunuza geri dönebilirsiniz.
+**Bir canlıyı alt et, ruhunu topla ve formuna bürün!**  
+*Klasik Morph Mod deneyimini modern Fabric mimarisiyle yeniden yaşatan kapsamlı dönüşüm modu.*
 
 ---
 
-### ⚡ Aktif Yetenekler (`G` Tuşu)
-Dönüştüğünüz canlıya göre **`G` tuşuna** basarak benzersiz aktif yetenekleri kullanabilirsiniz:
+</div>
 
-- 💣 **Creeper:** Kendinizi patlatın! Etraftaki moblara devasa hasar verirsiniz (siz zarar görmezsiniz).
-- 🌌 **Enderman:** Baktığınız noktaya 50 bloğa kadar güvenli ışınlanma (portal efektleri ile).
-- 🔥 **Blaze:** Küçük alev topu fırlatır, isabet eden hedefi yakar.
-- ☄️ **Ghast:** Patlayan devasa ateş topu fırlatır.
-- 🐲 **Ender Dragon:** Mor asit dumanı bırakan Dragon Fireball saldırısı.
-- 💀 **Wither:** Uçan patlayıcı Wither kafatası fırlatır.
-- 🌀 **Shulker:** Baktığınız hedefe kilitlenen ve havaya uçuran güdümlü mermi.
-- 🔊 **Warden:** 15 blok menzildeki hedefleri delen ve büyü hasarı vuran Sonik Patlama (Sonic Boom).
-- 🦑 **Kalamar:** Etrafı kör eden mürekkep püskürterek ileriye hızla fırlar.
-- 👅 **Kurbağa:** 10 blok mesafedeki mobu diliyle yakalayıp kendine çeker.
-- 🔨 **Demir Golem:** Yere vurarak etraftaki tüm düşmanları havaya savurur.
-- 🐐 **Keçi:** Hızla ileri atılır ve çarptığı mobları uzağa savurur.
-- 💨 **Breeze:** Rüzgar yükü fırlatır.
-- 📢 **Ravager:** Şiddetli kükreme ile etraftaki tüm varlıkları 8 blok geriye iter.
-- 🏹 **İskelet / Bogged / Stray:** Ok fırlatma.
-- 🐢 **Kaplumbağa:** Sert kabuğa bürünerek yüksek hasar direnci kazanma.
-- 🦎 **Axolotl:** Ölü taklidi yaparak görünmezlik ve yenilenme kazanma.
-- 🍄 **Mooshroom:** Mantar çorbası içerek kendini yenileme ve ekstra can kazanma.
-- 🥛 **İnek:** Süt ile üzerindeki tüm kötü efektleri temizleme.
-- 🦇 **Yarasa:** Sonar ekolokasyonu ile gece görüşünü açıp kapatma.
+## 📖 Genel Bakış
+
+Bir **Ender Ejderhası** olarak göklerde süzülmek, bir **Vex** olup duvarların içinden geçmek veya **Warden**'a dönüşüp sonik patlamalar fırlatmak ister miydiniz?
+
+**Babekon's Morph Mod**, Minecraft'a modern ve zengin bir dönüşüm mekaniği kazandırıyor. Dünyada alt ettiğiniz her canlının ruhunu toplayarak 3D menüden dilediğiniz moba dönüşebilir; onların boyutlarına, canlarına, özel animasyonlarına ve benzersiz aktif yeteneklerine anında sahip olabilirsiniz!
 
 ---
 
-### 🥊 Pasif & Yakın Dövüş Özellikleri
-- ✈️ **Uçuş:** Blaze, Ghast, Wither, Yarasa, Arı, Papağan, Vex, Ender Dragon.
-- 🌊 **Suda Nefes:** Yunus, Kalamar, Balıklar, Kaplumbağa, Guardian, Axolotl, Drowned.
-- 🔥 **Ateş Dayanıklılığı:** Blaze, Wither İskeleti, Magma Küp, Zombifiye Piglin, Strider.
-- 🕷️ **Duvar Tırmanma:** Örümcek ve Mağara Örümceği.
-- 💀 **Wither Vuruşu:** Wither İskeleti formunda hedeflere vuruşla Wither etkisi.
-- 🍖 **Açlık Vuruşu:** Husk formunda hedeflere vuruşla Açlık etkisi.
-- 🧪 **Zehir Vuruşu:** Mağara Örümceği ve Arı formunda hedeflere Zehir etkisi.
-- ❄️ **Yavaşlatma Vuruşu:** Stray formunda hedeflere Yavaşlatma etkisi.
+## ✨ Öne Çıkan Özellikler
+
+* 👻 **Ruh Toplama:** Bir canlıyı ilk kez yendiğinizde ruhu karakterinize çekilir ve dönüşüm kütüphanenize kalıcı olarak eklenir.
+* 🖥️ **3D Canlı Dönüşüm Menüsü (`-` Tuşu):** Açılan modern arayüzde tüm mobları canlı 3D modelleriyle görebilir, arama çubuğu ve filtrelerle dilediğiniz canlıya tek tıkla dönüşebilirsiniz.
+* 📏 **Dinamik Hitbox & Kamera Uyarlaması:** İster minik bir gümüşbalığına ister devasa bir demir goleme dönüşün; boyutunuz, vuruş alanınız ve kamera mesafeniz mobun büyüklüğüne göre pürüzsüzce ayarlanır.
+* ❤️ **Yüzdesel Can Uyumu:** Dönüşüm esnasında can kaybı yaşamazsınız. Can yüzdeniz neyse (örneğin %100 veya %50), dönüştüğünüz canlının da can yüzdesi aynı oranda başlar.
+* 🎬 **Canlı & Orijinal Animasyonlar:** Yarasaların kanat çırpışı, armadilloların top haline gelmesi, develerin hızlı depar atışı ve aksolotlların ölü taklidi gibi orijinal animasyonlar korunur.
 
 ---
 
-## 🎮 Tuş Atamaları
+## ⚡ Güçlü Aktif Yetenekler (`G` & `H` Tuşları)
+
+Canlıların doğasına uygun düzinelerce özel aktif güç:
+
+| Mob | Yetenek | Açıklama |
+| :--- | :--- | :--- |
+| 💥 **Creeper** | *Kendini Patlatma* | İstediğiniz an patlayın! Etraftaki düşmanlara devasa hasar verirsiniz (siz zarar görmezsiniz). |
+| 🌀 **Enderman** | *Anında Işınlanma* | Baktığınız hedef noktaya anında ve güvenle ışınlanın. |
+| 👻 **Vex** | *Duvarlardan Geçme* | Katı blokların ve duvarların içinden süzülerek geçin. |
+| 🔥 **Blaze** | *Alev Topu Yağmuru* | Havada süzülün ve seri alev topları fırlatın. |
+| 🪽 **Phantom** | *Roket İtişli Uçuş* | Elytra stili serbest süzülün ve roket itişiyle ivme kazanın. |
+| 🐙 **Kalamar & Glow Squid** | *Mürekkep Atılışı* | Kör edici mürekkep bulutu püskürterek ileriye doğru hızla atılın. |
+| 🔊 **Warden** | *Sonik Patlama* | Engelleri delen ve büyü hasarı vuran yıkıcı Sonic Boom fırlatın. |
+| 🐫 **Camel (Deve)** | *Hızlı Depar* | Bacak çırpma animasyonu ile ileriye doğru yüksek hızda atılın. |
+| 🛡️ **Armadillo & Axolotl** | *Savunma / Canlanma* | Armadillo ile top haline gelip zırhlanın, Axolotl ile ölü taklidi yapıp can yenileyin. |
+
+---
+
+## 🎮 Varsayılan Tuş Atamaları
+
 | Tuş | İşlev |
-|-----|-------|
-| `-` (Eksi) | Morph Menüsünü Açar |
-| `G` | Aktif Mob Yeteneğini Kullanır |
+| :---: | :--- |
+| <kbd>-</kbd> *(Eksi / Numpad -)* | **Dönüşüm Menüsünü Aç / Kapat** |
+| <kbd>G</kbd> | **Birincil Yeteneği Kullan** |
+| <kbd>H</kbd> | **İkincil Yeteneği Kullan** |
 
-*(İstediğiniz zaman Seçenekler -> Kontroller -> Tuş Atamaları menüsünden değiştirebilirsiniz)*
+> 💡 *Tüm tuş atamalarını oyun içinden **Seçenekler ➔ Kontroller ➔ Tuş Atamaları** menüsünden dilediğiniz gibi değiştirebilirsiniz.*
 
 ---
 
-## 🛠️ Derleme ve Kurulum
+## 📦 Kurulum
 
-### Gereksinimler:
-- Fabric Loader 0.16+
-- Fabric API
+1. **[Fabric Loader](https://fabricmc.net/use/)** (0.16.0 veya üzeri) kurun.
+2. Minecraft 1.21.1 için **[Fabric API](https://modrinth.com/mod/fabric-api)** indirin ve `.minecraft/mods` klasörüne atın.
+3. [Releases](https://github.com/Keremdesuu/Morph-Mod/releases) sayfasından en son sürüm `morphmod-2.0.0.jar` dosyasını indirip `.minecraft/mods` klasörüne ekleyin.
+4. Oyunu başlatın ve dönüşümün tadını çıkarın!
 
-Bu dosyayı `.minecraft/mods` klasörünüze atıp Fabric 1.21.1 ile oynayabilirsiniz!
+---
+
+## 📜 Lisans
+
+Bu proje **[MIT Lisansı](LICENSE)** altında lisanslanmıştır. Mod paketlerine (modpack) dahil etmekte tamamen serbestsiniz.
