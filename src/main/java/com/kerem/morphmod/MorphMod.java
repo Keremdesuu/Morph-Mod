@@ -22,7 +22,7 @@ public class MorphMod implements ModInitializer {
 
     @Override
     public void onInitialize() {
-        LOGGER.info("Morph Mod initializing...");
+        LOGGER.info("Babekon's Morph Mod initializing...");
 
         // Initialize systems
         MorphRegistry.init();
@@ -68,6 +68,6 @@ public class MorphMod implements ModInitializer {
             });
         });
 
-        LOGGER.info("Morph Mod initialized successfully!");
+        LOGGER.info("Babekon's Morph Mod initialized successfully!");
     }
 }

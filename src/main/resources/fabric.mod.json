@@ -2,7 +2,7 @@
     "schemaVersion": 1,
     "id": "morphmod",
     "version": "${version}",
-    "name": "Morph Mod",
+    "name": "Babekon's Morph Mod",
     "description": "Transform into any mob you've killed! Collect souls and gain their abilities. Öldürdüğün her mob'a dönüş!",
     "authors": [
         "Kerem"

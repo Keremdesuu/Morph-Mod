@@ -13,10 +13,10 @@
     "morphmod.ability.no_target": "§cGörüş alanında hedef yok!",
     "morphmod.ability.echolocation.on": "§aEkolokasyon Açık (Gece Görüşü)",
     "morphmod.ability.echolocation.off": "§cEkolokasyon Kapalı",
-    "morphmod.command.all_success": "§a[Morph Mod] %s adlı oyuncuya tüm moblar eklendi! (%d mob)",
-    "morphmod.command.all_multiple_success": "§a[Morph Mod] %d oyuncuya tüm moblar eklendi! (%d mob)",
+    "morphmod.command.all_success": "§a[Babekon's Morph Mod] %s adlı oyuncuya tüm moblar eklendi! (%d mob)",
+    "morphmod.command.all_multiple_success": "§a[Babekon's Morph Mod] %d oyuncuya tüm moblar eklendi! (%d mob)",
     "key.morphmod.open_menu": "Dönüşüm Menüsünü Aç",
     "key.morphmod.active_ability": "Birincil Yeteneği Kullan",
     "key.morphmod.secondary_ability": "İkincil Yeteneği Kullan",
-    "category.morphmod.general": "Morph Mod"
+    "category.morphmod.general": "Babekon's Morph Mod"
 }

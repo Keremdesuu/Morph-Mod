@@ -1,6 +1,6 @@
-# 🎭 Morph Mod (Minecraft 1.21.1 Fabric)
+# 🎭 Babekon's Morph Mod (Minecraft 1.21.1 Fabric)
 
-Minecraft 1.21.1 için geliştirilmiş, klasik **Morph Mod** deneyimini modern Fabric mimarisiyle yeniden yaşatan kapsamlı dönüşüm modu.
+Minecraft 1.21.1 için geliştirilmiş, klasik Morph deneyimini modern Fabric mimarisiyle yeniden yaşatan kapsamlı dönüşüm modu: **Babekon's Morph Mod**.
 
 Öldürdüğünüz her canlıdan ruh parçacıkları toplayın, 3D canlı menüden dilediğiniz moba dönüşün ve o mobun hem **pasif** özelliklerine hem de **özel aktif yeteneklerine** sahip olun!
 

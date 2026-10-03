@@ -13,10 +13,10 @@
     "morphmod.ability.no_target": "§cNo target in sight!",
     "morphmod.ability.echolocation.on": "§aEcholocation Activated (Night Vision)",
     "morphmod.ability.echolocation.off": "§cEcholocation Deactivated",
-    "morphmod.command.all_success": "§a[Morph Mod] Unlocked all morphs for %s! (%d morphs)",
-    "morphmod.command.all_multiple_success": "§a[Morph Mod] Unlocked all morphs for %d players! (%d morphs)",
+    "morphmod.command.all_success": "§a[Babekon's Morph Mod] Unlocked all morphs for %s! (%d morphs)",
+    "morphmod.command.all_multiple_success": "§a[Babekon's Morph Mod] Unlocked all morphs for %d players! (%d morphs)",
     "key.morphmod.open_menu": "Open Morph Menu",
     "key.morphmod.active_ability": "Use Primary Ability",
     "key.morphmod.secondary_ability": "Use Secondary Ability",
-    "category.morphmod.general": "Morph Mod"
+    "category.morphmod.general": "Babekon's Morph Mod"
 }
