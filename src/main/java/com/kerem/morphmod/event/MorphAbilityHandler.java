@@ -98,27 +98,36 @@ public class MorphAbilityHandler {
             }
         }
 
-        // Aquatic & Fish mechanics: Guardian, Elder Guardian, Cod, Tropical Fish, Salmon, Pufferfish, Tadpole
-        boolean isFishOrGuardian = entityType == EntityType.GUARDIAN || entityType == EntityType.ELDER_GUARDIAN
-                || entityType == EntityType.COD || entityType == EntityType.TROPICAL_FISH
-                || entityType == EntityType.SALMON || entityType == EntityType.PUFFERFISH
-                || entityType == EntityType.TADPOLE;
+        // Blaze water & rain damage (takes drown damage every second in water or rain)
+        if (entityType == EntityType.BLAZE) {
+            if (player.isInWaterRainOrBubble()) {
+                if (player.tickCount % 20 == 0) {
+                    player.hurt(player.damageSources().drown(), 1.0F);
+                }
+            }
+        }
 
-        if (isFishOrGuardian) {
+        // Aquatic & Fish mechanics: Guardian, Elder Guardian, Cod, Tropical Fish, Salmon, Pufferfish, Tadpole, Squid, etc.
+        boolean isSuffocatingAquatic = MorphRegistry.isSuffocatingOnLand(entityType);
+
+        if (isSuffocatingAquatic) {
             if (player.isInWaterRainOrBubble()) {
                 // Unlimited air supply under water without potion effect icon
                 player.setAirSupply(player.getMaxAirSupply());
             } else {
-                // Suffocate on land like real fish/guardians
-                int air = player.getAirSupply() - 1;
-                player.setAirSupply(air);
-                if (air <= -20) {
+                // Suffocate on land like real fish/squids
+                int air = player.getAirSupply() - 3;
+                if (air <= 0) {
                     player.setAirSupply(0);
-                    player.hurt(player.damageSources().dryOut(), 2.0F);
-                    if (entityType == EntityType.COD || entityType == EntityType.TROPICAL_FISH || entityType == EntityType.SALMON) {
-                        player.level().playSound(null, player.getX(), player.getY(), player.getZ(),
-                                SoundEvents.FISH_SWIM, SoundSource.PLAYERS, 1.0F, 1.4F);
+                    if (player.tickCount % 20 == 0) {
+                        player.hurt(player.damageSources().dryOut(), 2.0F);
+                        if (entityType == EntityType.COD || entityType == EntityType.TROPICAL_FISH || entityType == EntityType.SALMON) {
+                            player.level().playSound(null, player.getX(), player.getY(), player.getZ(),
+                                    SoundEvents.FISH_SWIM, SoundSource.PLAYERS, 1.0F, 1.4F);
+                        }
                     }
+                } else {
+                    player.setAirSupply(air);
                 }
             }
         }
@@ -127,11 +136,8 @@ public class MorphAbilityHandler {
             switch (ability) {
                 case FLIGHT -> {}
                 case WATER_BREATHING -> {
-                    // Only apply potion effect to non-fish aquatic mobs (like Turtle, Dolphin, Drowned)
-                    if (!isFishOrGuardian) {
-                        player.addEffect(new MobEffectInstance(
-                                MobEffects.WATER_BREATHING, 60, 0, false, false, true));
-                    }
+                    // Handled natively via canBreatheUnderwater in LivingEntityMixin and ClientLivingEntityMixin
+                    // No potion effect icon or particles cluttering the screen!
                 }
                 case FIRE_RESISTANCE -> {
                     player.addEffect(new MobEffectInstance(
@@ -191,16 +197,20 @@ public class MorphAbilityHandler {
     }
 
     /**
-     * Sets the player's max health to match the morphed mob's health.
+     * Sets the player's max health to match the morphed mob's health,
+     * maintaining the exact health percentage (e.g. 100% full stays 100% full, 65% stays 65%).
      */
     public static void applyMorphHealth(ServerPlayer player, EntityType<?> entityType) {
         int morphHealth = MorphRegistry.getHealth(entityType);
         AttributeInstance healthAttr = player.getAttribute(Attributes.MAX_HEALTH);
         if (healthAttr != null) {
+            double oldMax = healthAttr.getValue();
+            float currentHealth = player.getHealth();
+            float ratio = oldMax > 0.0 ? (float) (currentHealth / oldMax) : 1.0F;
+            ratio = Math.clamp(ratio, 0.0F, 1.0F);
+
             healthAttr.setBaseValue(morphHealth);
-            if (player.getHealth() > morphHealth) {
-                player.setHealth(morphHealth);
-            }
+            player.setHealth(Math.max(1.0F, morphHealth * ratio));
         }
     }
 
@@ -226,13 +236,16 @@ public class MorphAbilityHandler {
             player.onUpdateAbilities();
         }
 
-        // Reset max health to default (20 HP = 10 hearts)
+        // Reset max health to default (20 HP = 10 hearts) with percentage preserved
         AttributeInstance healthAttr = player.getAttribute(Attributes.MAX_HEALTH);
         if (healthAttr != null) {
+            double oldMax = healthAttr.getValue();
+            float currentHealth = player.getHealth();
+            float ratio = oldMax > 0.0 ? (float) (currentHealth / oldMax) : 1.0F;
+            ratio = Math.clamp(ratio, 0.0F, 1.0F);
+
             healthAttr.setBaseValue(20.0);
-            if (player.getHealth() > 20.0f) {
-                player.setHealth(20.0f);
-            }
+            player.setHealth(Math.max(1.0F, 20.0F * ratio));
         }
 
         // Reset movement speed to default (0.10)

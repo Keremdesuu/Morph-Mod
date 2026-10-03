@@ -29,8 +29,12 @@ public class MorphRegistry {
         register(EntityType.WOLF, 8, ActiveAbility.DASH,
                 MorphAbility.SPEED_BOOST);
         register(EntityType.HORSE, 30, ActiveAbility.HORSE_JUMP);
-        register(EntityType.DONKEY, 15, ActiveAbility.DASH);
-        register(EntityType.MULE, 15, ActiveAbility.DASH);
+        register(EntityType.DONKEY, 15, ActiveAbility.NONE);
+        register(EntityType.MULE, 15, ActiveAbility.NONE);
+        register(EntityType.SKELETON_HORSE, 15, ActiveAbility.HORSE_JUMP,
+                MorphAbility.WATER_BREATHING, MorphAbility.NO_FALL_DAMAGE);
+        register(EntityType.ZOMBIE_HORSE, 25, ActiveAbility.HORSE_JUMP,
+                MorphAbility.NO_FALL_DAMAGE);
         register(EntityType.PIG, 10, ActiveAbility.NONE);
         register(EntityType.COW, 10, ActiveAbility.CLEAR_EFFECTS);
         register(EntityType.SHEEP, 8, ActiveAbility.NONE);
@@ -38,7 +42,7 @@ public class MorphRegistry {
                 MorphAbility.JUMP_BOOST);
         register(EntityType.FOX, 10, ActiveAbility.POUNCE,
                 MorphAbility.SPEED_BOOST);
-        register(EntityType.OCELOT, 10, ActiveAbility.DASH,
+        register(EntityType.OCELOT, 10, ActiveAbility.NONE,
                 MorphAbility.SPEED_BOOST);
         register(EntityType.PARROT, 6, ActiveAbility.NONE,
                 MorphAbility.FLIGHT);
@@ -46,10 +50,14 @@ public class MorphRegistry {
                 MorphAbility.JUMP_BOOST, MorphAbility.NO_FALL_DAMAGE);
         register(EntityType.FROG, 10, ActiveAbility.TONGUE_GRAB,
                 MorphAbility.JUMP_BOOST);
-        register(EntityType.CAMEL, 32, ActiveAbility.DASH);
+        register(EntityType.CAMEL, 32, ActiveAbility.CAMEL_DASH);
         register(EntityType.SNIFFER, 14, ActiveAbility.NONE);
         register(EntityType.ARMADILLO, 12, ActiveAbility.CURL_UP);
         register(EntityType.LLAMA, 22, ActiveAbility.SPIT);
+        register(EntityType.TRADER_LLAMA, 22, ActiveAbility.SPIT);
+        register(EntityType.WANDERING_TRADER, 20, ActiveAbility.INVISIBILITY);
+        register(EntityType.ALLAY, 20, ActiveAbility.NONE,
+                MorphAbility.FLIGHT, MorphAbility.SMALL_SIZE, MorphAbility.SLOW_FALLING);
         register(EntityType.MOOSHROOM, 10, ActiveAbility.SELF_HEAL);
         register(EntityType.PANDA, 20, ActiveAbility.SNEEZE);
         register(EntityType.POLAR_BEAR, 30, ActiveAbility.NONE);
@@ -70,7 +78,7 @@ public class MorphRegistry {
         register(EntityType.SALMON, 3, ActiveAbility.NONE,
                 MorphAbility.WATER_BREATHING, MorphAbility.SMALL_SIZE);
         register(EntityType.PUFFERFISH, 3, ActiveAbility.PUFF_UP,
-                MorphAbility.WATER_BREATHING);
+                MorphAbility.WATER_BREATHING, MorphAbility.POISON_STRIKE);
         register(EntityType.TROPICAL_FISH, 3, ActiveAbility.NONE,
                 MorphAbility.WATER_BREATHING, MorphAbility.SMALL_SIZE);
         register(EntityType.TURTLE, 30, ActiveAbility.SHELL_DEFENSE,
@@ -101,8 +109,7 @@ public class MorphRegistry {
                 MorphAbility.FIRE_RESISTANCE, MorphAbility.FLIGHT);
         register(EntityType.GHAST, 10, ActiveAbility.SHOOT_LARGE_FIREBALL,
                 MorphAbility.FLIGHT);
-        register(EntityType.PHANTOM, 20, ActiveAbility.DASH,
-                MorphAbility.FLIGHT);
+        register(EntityType.PHANTOM, 20, ActiveAbility.ROCKET_BOOST);
         register(EntityType.WITHER_SKELETON, 20, ActiveAbility.NONE,
                 MorphAbility.FIRE_RESISTANCE, MorphAbility.WITHER_STRIKE);
         register(EntityType.PIGLIN, 16, ActiveAbility.NONE);
@@ -116,7 +123,7 @@ public class MorphRegistry {
                 MorphAbility.FIRE_RESISTANCE);
         register(EntityType.SLIME, 16, ActiveAbility.NONE,
                 MorphAbility.JUMP_BOOST, MorphAbility.NO_FALL_DAMAGE);
-        register(EntityType.WITCH, 26, ActiveAbility.THROW_POTION);
+        register(EntityType.WITCH, 26, ActiveAbility.THROW_POTION, ActiveAbility.THROW_HEALING_POTION);
         register(EntityType.PILLAGER, 24, ActiveAbility.SHOOT_ARROW);
         register(EntityType.VINDICATOR, 24, ActiveAbility.NONE);
         register(EntityType.RAVAGER, 100, ActiveAbility.ROAR,
@@ -277,10 +284,33 @@ public class MorphRegistry {
         setSpeed(EntityType.HORSE, 0.135F);
         setSpeed(EntityType.DONKEY, 0.115F);
         setSpeed(EntityType.MULE, 0.115F);
+        setSpeed(EntityType.SKELETON_HORSE, 0.13F);
+        setSpeed(EntityType.ZOMBIE_HORSE, 0.13F);
+        setSpeed(EntityType.TRADER_LLAMA, 0.10F);
+        setSpeed(EntityType.WANDERING_TRADER, 0.10F);
+        setSpeed(EntityType.ALLAY, 0.10F);
         setSpeed(EntityType.CAMEL, 0.11F);
         setSpeed(EntityType.SILVERFISH, 0.12F);
         setSpeed(EntityType.ENDERMAN, 0.12F);
         setSpeed(EntityType.SHULKER, 0.0F);
+    }
+
+    /**
+     * Checks if the given entity type is an aquatic creature that suffocates when out of water on land.
+     */
+    public static boolean isSuffocatingOnLand(EntityType<?> entityType) {
+        if (entityType == null) return false;
+        return entityType == EntityType.GUARDIAN
+                || entityType == EntityType.ELDER_GUARDIAN
+                || entityType == EntityType.COD
+                || entityType == EntityType.TROPICAL_FISH
+                || entityType == EntityType.SALMON
+                || entityType == EntityType.PUFFERFISH
+                || entityType == EntityType.TADPOLE
+                || entityType == EntityType.SQUID
+                || entityType == EntityType.GLOW_SQUID
+                || entityType == EntityType.AXOLOTL
+                || entityType == EntityType.DOLPHIN;
     }
 
     /**

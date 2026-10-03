@@ -46,7 +46,17 @@ public class MorphKeyBindings {
 
         // Check for key presses each client tick
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            while (morphMenuKey.consumeClick()) {
+            boolean menuRequested = morphMenuKey.consumeClick();
+
+            // Also check for Keypad Minus (GLFW_KEY_KP_SUBTRACT)
+            if (!menuRequested && client.player != null && client.screen == null) {
+                long window = Minecraft.getInstance().getWindow().getWindow();
+                if (InputConstants.isKeyDown(window, GLFW.GLFW_KEY_KP_SUBTRACT)) {
+                    menuRequested = true;
+                }
+            }
+
+            if (menuRequested) {
                 // Only open menu if player exists and no other screen is open
                 if (client.player != null && client.screen == null) {
                     Minecraft.getInstance().setScreen(new MorphScreen());
@@ -56,6 +66,23 @@ public class MorphKeyBindings {
             while (activeAbilityKey.consumeClick()) {
                 // Trigger primary active ability
                 if (client.player != null && client.screen == null) {
+                    net.minecraft.resources.ResourceLocation morph = ClientMorphData.getActiveMorph(client.player.getUUID());
+                    if (morph != null) {
+                        String path = morph.getPath();
+                        if (path.equals("fox")) {
+                            ClientMorphData.triggerFoxPounce();
+                        } else if (path.equals("evoker")) {
+                            ClientMorphData.triggerEvokerSpell();
+                        } else if (path.equals("pufferfish")) {
+                            ClientMorphData.triggerPufferPuff();
+                        } else if (path.equals("camel")) {
+                            ClientMorphData.triggerCamelDash();
+                        } else if (path.equals("armadillo")) {
+                            ClientMorphData.triggerArmadilloRoll();
+                        } else if (path.equals("axolotl")) {
+                            ClientMorphData.triggerAxolotlPlayDead();
+                        }
+                    }
                     ClientPlayNetworking.send(new ActiveAbilityPayload(false));
                 }
             }

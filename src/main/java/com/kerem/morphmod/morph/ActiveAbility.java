@@ -9,13 +9,14 @@ public enum ActiveAbility {
 
     // ═══ Projectile Attacks ═══
     SHOOT_ARROW("shoot_arrow", 15),
-    SHOOT_FIRE_CHARGE("shoot_fire_charge", 60),
+    SHOOT_FIRE_CHARGE("shoot_fire_charge", 100),
     SHOOT_LARGE_FIREBALL("shoot_large_fireball", 60),
     DRAGON_FIREBALL("dragon_fireball", 80),
     WITHER_SKULL("wither_skull", 40),
     SHULKER_BULLET("shulker_bullet", 40),
     THROW_SNOWBALL("throw_snowball", 8),
     THROW_POTION("throw_potion", 40),
+    THROW_HEALING_POTION("throw_healing_potion", 60),
     THROW_TRIDENT("throw_trident", 20),
     SPIT("spit", 15),
     WIND_CHARGE("wind_charge", 20),
@@ -42,6 +43,8 @@ public enum ActiveAbility {
     CHARGE("charge", 40),
     POUNCE("pounce", 20),
     HORSE_JUMP("horse_jump", 30),
+    ROCKET_BOOST("rocket_boost", 40),
+    CAMEL_DASH("camel_dash", 55),
 
     // ═══ Defensive Abilities ═══
     SHELL_DEFENSE("shell_defense", 100),
@@ -52,7 +55,8 @@ public enum ActiveAbility {
     // ═══ Utility Abilities ═══
     SELF_HEAL("self_heal", 200),
     CLEAR_EFFECTS("clear_effects", 200),
-    ECHOLOCATION("echolocation", 40);
+    ECHOLOCATION("echolocation", 40),
+    INVISIBILITY("invisibility", 200);
 
     private final String id;
     private final int cooldownTicks;

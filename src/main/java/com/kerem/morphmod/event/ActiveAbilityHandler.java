@@ -23,6 +23,8 @@ import net.minecraft.world.entity.projectile.*;
 import net.minecraft.world.entity.projectile.windcharge.WindCharge;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.alchemy.PotionContents;
+import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.*;
 
@@ -121,7 +123,8 @@ public class ActiveAbilityHandler {
             case WITHER_SKULL -> shootWitherSkull(player, level);
             case SHULKER_BULLET -> shootShulkerBullet(player, level);
             case THROW_SNOWBALL -> throwSnowball(player, level);
-            case THROW_POTION -> throwPotion(player, level);
+            case THROW_POTION -> throwPoisonPotion(player, level);
+            case THROW_HEALING_POTION -> throwHealingPotion(player, level);
             case THROW_TRIDENT -> throwTrident(player, level);
             case SPIT -> spit(player, level);
             case WIND_CHARGE -> windCharge(player, level);
@@ -148,6 +151,8 @@ public class ActiveAbilityHandler {
             case CHARGE -> charge(player, level);
             case POUNCE -> pounce(player, level);
             case HORSE_JUMP -> horseJump(player, level);
+            case ROCKET_BOOST -> rocketBoost(player);
+            case CAMEL_DASH -> camelDash(player, level);
 
             // Defensive
             case SHELL_DEFENSE -> shellDefense(player, level);
@@ -159,6 +164,7 @@ public class ActiveAbilityHandler {
             case SELF_HEAL -> selfHeal(player, level);
             case CLEAR_EFFECTS -> clearEffects(player, level);
             case ECHOLOCATION -> echolocation(player, level);
+            case INVISIBILITY -> drinkInvisibility(player, level);
 
             default -> false;
         };
@@ -261,12 +267,23 @@ public class ActiveAbilityHandler {
     }
 
     /** Witch — throws a splash potion of harming */
-    private static boolean throwPotion(ServerPlayer player, ServerLevel level) {
+    /** Witch — throws a splash potion of poison */
+    private static boolean throwPoisonPotion(ServerPlayer player, ServerLevel level) {
         ThrownPotion potion = new ThrownPotion(level, player);
-        ItemStack potionStack = new ItemStack(Items.SPLASH_POTION);
-        // Apply harming effect to the potion item
+        ItemStack potionStack = PotionContents.createItemStack(Items.SPLASH_POTION, Potions.POISON);
         potion.setItem(potionStack);
-        potion.shootFromRotation(player, player.getXRot(), player.getYRot(), -20.0F, 0.5F, 1.0F);
+        potion.shootFromRotation(player, player.getXRot(), player.getYRot(), -20.0F, 0.65F, 1.0F);
+        level.addFreshEntity(potion);
+        playSound(level, player, SoundEvents.WITCH_THROW);
+        return true;
+    }
+
+    /** Witch — throws a splash potion of instant healing */
+    private static boolean throwHealingPotion(ServerPlayer player, ServerLevel level) {
+        ThrownPotion potion = new ThrownPotion(level, player);
+        ItemStack potionStack = PotionContents.createItemStack(Items.SPLASH_POTION, Potions.HEALING);
+        potion.setItem(potionStack);
+        potion.shootFromRotation(player, player.getXRot(), player.getYRot(), -20.0F, 0.65F, 1.0F);
         level.addFreshEntity(potion);
         playSound(level, player, SoundEvents.WITCH_THROW);
         return true;
@@ -543,10 +560,17 @@ public class ActiveAbilityHandler {
 
     /** Squid, Glow Squid — squirts ink (blinds nearby enemies) and dashes forward */
     private static boolean inkDash(ServerPlayer player, ServerLevel level) {
+        MorphManager manager = MorphManager.get(player.server);
+        MorphData data = manager.getMorphData(player.getUUID());
+        boolean isGlow = data != null && data.getActiveMorph() != null && data.getActiveMorph().getPath().equals("glow_squid");
+
         // Blind nearby entities
         AABB area = player.getBoundingBox().inflate(5.0);
         for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class, area, e -> e != player)) {
             entity.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 60, 0));
+            if (isGlow) {
+                entity.addEffect(new MobEffectInstance(MobEffects.GLOWING, 100, 0));
+            }
         }
 
         // Propel player forward
@@ -554,10 +578,17 @@ public class ActiveAbilityHandler {
         player.push(look.x * 2.5, 0.3, look.z * 2.5);
         player.hurtMarked = true;
 
-        level.sendParticles(ParticleTypes.SQUID_INK,
-                player.getX(), player.getY() + 0.5, player.getZ(),
-                40, 1.5, 0.5, 1.5, 0.1);
-        playSound(level, player, SoundEvents.SQUID_SQUIRT);
+        if (isGlow) {
+            level.sendParticles(ParticleTypes.GLOW_SQUID_INK,
+                    player.getX(), player.getY() + 0.5, player.getZ(),
+                    40, 1.5, 0.5, 1.5, 0.1);
+            playSound(level, player, SoundEvents.GLOW_SQUID_SQUIRT);
+        } else {
+            level.sendParticles(ParticleTypes.SQUID_INK,
+                    player.getX(), player.getY() + 0.5, player.getZ(),
+                    40, 1.5, 0.5, 1.5, 0.1);
+            playSound(level, player, SoundEvents.SQUID_SQUIRT);
+        }
         return true;
     }
 
@@ -690,6 +721,19 @@ public class ActiveAbilityHandler {
         return true;
     }
 
+    /** Phantom — silent rocket boost acceleration for Elytra flight (no rocket item, no firework sounds/particles) */
+    private static boolean rocketBoost(ServerPlayer player) {
+        if (!player.isFallFlying()) {
+            player.startFallFlying();
+        }
+        Vec3 look = player.getLookAngle();
+        Vec3 motion = player.getDeltaMovement();
+        player.setDeltaMovement(motion.add(look.x * 1.5, look.y * 1.5, look.z * 1.5));
+        player.hasImpulse = true;
+        player.hurtMarked = true;
+        return true;
+    }
+
     // ═══════════════════════════════════════════════════════════════
     //  DEFENSIVE ABILITIES
     // ═══════════════════════════════════════════════════════════════
@@ -758,6 +802,27 @@ public class ActiveAbilityHandler {
         return true;
     }
 
+    /** Camel — dashes forward with legs kicking rapidly */
+    private static boolean camelDash(ServerPlayer player, ServerLevel level) {
+        Vec3 look = player.getLookAngle();
+        Vec3 dashVec = new Vec3(look.x, 0.0, look.z).normalize().scale(2.2).add(0.0, 0.35, 0.0);
+        player.setDeltaMovement(dashVec);
+        player.hasImpulse = true;
+        player.hurtMarked = true;
+        level.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE,
+                player.getX(), player.getY() + 0.2, player.getZ(),
+                12, 0.4, 0.1, 0.4, 0.02);
+        playSound(level, player, SoundEvents.CAMEL_DASH);
+        return true;
+    }
+
+    /** Wandering Trader — drinks invisibility potion to hide */
+    private static boolean drinkInvisibility(ServerPlayer player, ServerLevel level) {
+        player.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, 200, 0, false, true, true));
+        playSound(level, player, SoundEvents.WANDERING_TRADER_DRINK_POTION);
+        return true;
+    }
+
     // ═══════════════════════════════════════════════════════════════
     //  MELEE ATTACK EFFECTS (passive, applied on hit)
     // ═══════════════════════════════════════════════════════════════
@@ -783,7 +848,7 @@ public class ActiveAbilityHandler {
             target.addEffect(new MobEffectInstance(MobEffects.HUNGER, 200, 0));
         }
         if (abilities.contains(MorphAbility.POISON_STRIKE)) {
-            target.addEffect(new MobEffectInstance(MobEffects.POISON, 100, 0));
+            target.addEffect(new MobEffectInstance(MobEffects.POISON, 140, 1));
         }
         if (abilities.contains(MorphAbility.SLOW_STRIKE)) {
             target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 200, 1));

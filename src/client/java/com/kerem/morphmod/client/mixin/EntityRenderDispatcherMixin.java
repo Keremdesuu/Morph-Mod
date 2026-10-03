@@ -2,6 +2,7 @@ package com.kerem.morphmod.client.mixin;
 
 import com.kerem.morphmod.client.ClientMorphData;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.resources.ResourceLocation;
@@ -9,9 +10,16 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ambient.Bat;
 import net.minecraft.world.entity.animal.*;
+import net.minecraft.world.entity.animal.armadillo.Armadillo;
+import net.minecraft.world.entity.animal.axolotl.Axolotl;
+import net.minecraft.world.entity.animal.camel.Camel;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.entity.monster.Guardian;
+import net.minecraft.world.entity.monster.SpellcasterIllager;
+import net.minecraft.world.entity.monster.warden.Warden;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -61,6 +69,19 @@ public abstract class EntityRenderDispatcherMixin {
         // Copy all transform and animation data from the player to the fake entity
         copyTransforms(player, fakeEntity, partialTick);
 
+        // Morph transition animation (smooth growth and subtle shimmer)
+        boolean isLocalPlayer = Minecraft.getInstance().player != null && Minecraft.getInstance().player.getUUID().equals(player.getUUID());
+        float transitionProgress = isLocalPlayer ? ClientMorphData.getMorphTransitionProgress(partialTick) : 1.0F;
+
+        if (transitionProgress < 1.0F) {
+            float ease = (float) Math.sin(transitionProgress * Math.PI / 2.0);
+            float scale = 0.15F + 0.85F * ease;
+            poseStack.pushPose();
+            poseStack.scale(scale, scale, scale);
+            float wobble = (float) Math.sin((1.0F - ease) * Math.PI * 3.0) * (1.0F - ease) * 8.0F;
+            poseStack.mulPose(Axis.YP.rotationDegrees(wobble));
+        }
+
         // Render the fake entity instead, with recursion guard
         morphmod$isRenderingMorph = true;
         try {
@@ -68,6 +89,9 @@ public abstract class EntityRenderDispatcherMixin {
             self.render(fakeEntity, x, y, z, rotationYaw, partialTick, poseStack, bufferSource, light);
         } finally {
             morphmod$isRenderingMorph = false;
+            if (transitionProgress < 1.0F) {
+                poseStack.popPose();
+            }
         }
 
         // Cancel the original player render
@@ -154,36 +178,63 @@ public abstract class EntityRenderDispatcherMixin {
 
         // Special handling for Ender Dragon animation & latency buffer
         if (fakeEntity instanceof EnderDragon dragon) {
+            float dragonYaw = player.getYRot() + 180.0F; // Fix dragon model facing backwards
             if (dragon.posPointer < 0) {
                 dragon.posPointer = 0;
                 for (int i = 0; i < dragon.positions.length; i++) {
-                    dragon.positions[i][0] = player.getYRot();
+                    dragon.positions[i][0] = dragonYaw;
                     dragon.positions[i][1] = player.getY();
                     dragon.positions[i][2] = 0.0;
                 }
             }
 
-            dragon.oFlapTime = dragon.flapTime;
             double horizDist = player.getDeltaMovement().horizontalDistance();
-            float flapInc = (player.onGround() && horizDist < 0.01) ? 0.03F : 0.12F;
-            dragon.flapTime += flapInc;
+            float flapSpeed = (player.onGround() && horizDist < 0.01) ? 0.015F : 0.035F;
+            float currentFlap = (player.tickCount + partialTick) * flapSpeed;
+            dragon.oFlapTime = currentFlap - flapSpeed;
+            dragon.flapTime = currentFlap;
 
             dragon.posPointer = (dragon.posPointer + 1) & 63;
-            dragon.positions[dragon.posPointer][0] = player.getYRot();
+            dragon.positions[dragon.posPointer][0] = dragonYaw;
             dragon.positions[dragon.posPointer][1] = player.getY();
             dragon.positions[dragon.posPointer][2] = 0.0;
         }
 
-        // Special handling for Guardian tail and spikes animation
+        // Special handling for Squid / Glow Squid tentacle movement animation
+        if (fakeEntity instanceof Squid squid) {
+            float moveSpeed = player.isInWaterRainOrBubble() ? 0.12F : 0.05F;
+            float moveTime = (player.tickCount + partialTick) * moveSpeed;
+            squid.oldTentacleAngle = squid.tentacleAngle;
+            squid.tentacleAngle = Math.abs(Mth.sin(moveTime)) * (float) Math.PI * 0.25F;
+            squid.oldTentacleMovement = squid.tentacleMovement;
+            squid.tentacleMovement = moveTime;
+        }
+
+        // Special handling for Guardian tail and spikes animation (smooth natural speed)
         if (fakeEntity instanceof Guardian guardian) {
             try {
                 GuardianAccessor gAccessor = (GuardianAccessor) guardian;
                 gAccessor.setClientSideTailAnimationO(gAccessor.getClientSideTailAnimation());
-                float tailInc = player.isInWaterRainOrBubble() ? 0.22F : 0.65F;
+                float tailInc = player.isInWaterRainOrBubble() ? 0.04F : 0.08F;
                 gAccessor.setClientSideTailAnimation(gAccessor.getClientSideTailAnimation() + tailInc);
                 gAccessor.setClientSideSpikesAnimationO(gAccessor.getClientSideSpikesAnimation());
-                gAccessor.setClientSideSpikesAnimation(gAccessor.getClientSideSpikesAnimation() + 0.05F);
+                gAccessor.setClientSideSpikesAnimation(gAccessor.getClientSideSpikesAnimation() + 0.015F);
             } catch (Exception ignored) {
+            }
+        }
+
+        // Special handling for Parrot flying and walking animation
+        if (fakeEntity instanceof Parrot parrot) {
+            boolean isAirborne = !player.onGround();
+            if (isAirborne) {
+                parrot.oFlap = parrot.flap;
+                parrot.flap += 0.45F;
+                parrot.flapSpeed = 1.0F;
+                parrot.oFlapSpeed = 1.0F;
+            } else {
+                parrot.oFlap = parrot.flap;
+                parrot.flapSpeed = 0.0F;
+                parrot.oFlapSpeed = 0.0F;
             }
         }
 
@@ -206,9 +257,9 @@ public abstract class EntityRenderDispatcherMixin {
             }
         }
 
-        // Special handling for Fox pounce pose
+        // Special handling for Fox pounce pose (ONLY when active ability was used)
         if (fakeEntity instanceof Fox fox) {
-            fox.setIsPouncing(!player.onGround() && player.getDeltaMovement().y > 0.05);
+            fox.setIsPouncing(ClientMorphData.isFoxPouncing() && !player.onGround());
         }
 
         // Special handling for Chicken wing flapping during glide
@@ -249,6 +300,59 @@ public abstract class EntityRenderDispatcherMixin {
         // Special handling for Polar Bear attack standing animation
         if (fakeEntity instanceof PolarBear polarBear) {
             polarBear.setStanding(player.attackAnim > 0.0F);
+        }
+
+        // Special handling for Evoker spell casting arm pose
+        if (fakeEntity instanceof SpellcasterIllager illager) {
+            illager.getEntityData().set(SpellcasterIllagerAccessor.getSpellCastingId(), (byte) (ClientMorphData.isEvokerCasting() ? 1 : 0));
+        }
+
+        // Special handling for Pufferfish inflation state
+        if (fakeEntity instanceof Pufferfish pufferfish) {
+            pufferfish.setPuffState(ClientMorphData.isPufferPuffed() ? Pufferfish.STATE_FULL : Pufferfish.STATE_SMALL);
+        }
+
+        // Special handling for Warden attack arm raising & smash
+        if (fakeEntity instanceof Warden warden) {
+            if (player.attackAnim > 0.0F) {
+                warden.attackAnimationState.startIfStopped(player.tickCount);
+            }
+            if (warden.attackAnimationState.getAccumulatedTime() > 800L) {
+                warden.attackAnimationState.stop();
+            }
+        }
+
+        // Special handling for Camel dash animation
+        if (fakeEntity instanceof Camel camel) {
+            if (ClientMorphData.isCamelDashing()) {
+                camel.dashAnimationState.startIfStopped(player.tickCount);
+                camel.setDashing(true);
+            } else {
+                camel.dashAnimationState.stop();
+                camel.setDashing(false);
+            }
+        }
+
+        // Special handling for Armadillo rolling up into a ball shell
+        if (fakeEntity instanceof Armadillo armadillo) {
+            if (ClientMorphData.isArmadilloRolling()) {
+                armadillo.switchToState(Armadillo.ArmadilloState.SCARED);
+                armadillo.rollUpAnimationState.startIfStopped(player.tickCount);
+            } else {
+                armadillo.switchToState(Armadillo.ArmadilloState.IDLE);
+                armadillo.rollUpAnimationState.stop();
+            }
+        }
+
+        // Special handling for Axolotl playing dead animation
+        if (fakeEntity instanceof Axolotl axolotl) {
+            axolotl.setPlayingDead(ClientMorphData.isAxolotlPlayingDead());
+        }
+
+        // Special handling for Bat flying animation
+        if (fakeEntity instanceof Bat bat) {
+            bat.restAnimationState.stop();
+            bat.flyAnimationState.startIfStopped(player.tickCount);
         }
     }
 }

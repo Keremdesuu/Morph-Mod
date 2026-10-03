@@ -84,6 +84,9 @@ public class MorphModClient implements ClientModInitializer {
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (client.player == null || client.isPaused()) return;
 
+            ClientMorphData.tickCameraAndTransition();
+            ClientMorphData.tickFoxPounce(client.player);
+
             ResourceLocation morphId = ClientMorphData.getActiveMorph(client.player.getUUID());
             boolean isShulker = morphId != null && morphId.getPath().equals("shulker");
             boolean isHiddenSilverfish = ClientMorphData.isSilverfishHidden();

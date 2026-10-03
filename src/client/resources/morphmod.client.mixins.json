@@ -14,7 +14,10 @@
         "ScreenEffectRendererMixin",
         "EntityAccessor",
         "RabbitAccessor",
-        "GuardianAccessor"
+        "GuardianAccessor",
+        "CameraMixin",
+        "LocalPlayerMixin",
+        "SpellcasterIllagerAccessor"
     ],
     "injectors": {
         "defaultRequire": 1

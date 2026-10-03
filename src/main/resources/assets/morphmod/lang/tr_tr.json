@@ -11,6 +11,8 @@
     "morphmod.ability.no_secondary": "§cBu mobun ikincil bir yeteneği yok!",
     "morphmod.ability.cooldown": "§eYetenek bekleme süresinde: %s sn",
     "morphmod.ability.no_target": "§cGörüş alanında hedef yok!",
+    "morphmod.ability.echolocation.on": "§aEkolokasyon Açık (Gece Görüşü)",
+    "morphmod.ability.echolocation.off": "§cEkolokasyon Kapalı",
     "morphmod.command.all_success": "§a[Morph Mod] %s adlı oyuncuya tüm moblar eklendi! (%d mob)",
     "morphmod.command.all_multiple_success": "§a[Morph Mod] %d oyuncuya tüm moblar eklendi! (%d mob)",
     "key.morphmod.open_menu": "Dönüşüm Menüsünü Aç",

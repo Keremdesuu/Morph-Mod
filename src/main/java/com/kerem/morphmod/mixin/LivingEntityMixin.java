@@ -12,6 +12,7 @@ import net.minecraft.world.entity.LivingEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import com.kerem.morphmod.event.SilverfishHideHandler;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
@@ -77,6 +78,23 @@ public abstract class LivingEntityMixin {
         }
     }
 
+    @ModifyVariable(method = "hurt", at = @At("HEAD"), argsOnly = true)
+    private float morphmod$boostSnowballDamageForBlaze(float amount, net.minecraft.world.damagesource.DamageSource source) {
+        if (amount <= 0.0F && source.getDirectEntity() instanceof net.minecraft.world.entity.projectile.Snowball) {
+            LivingEntity self = (LivingEntity) (Object) this;
+            if (self instanceof ServerPlayer player) {
+                MorphManager manager = MorphManager.get(player.server);
+                MorphData data = manager.getMorphData(player.getUUID());
+                if (data != null && data.isMorphActive()) {
+                    if (EntityType.BLAZE.equals(BuiltInRegistries.ENTITY_TYPE.get(data.getActiveMorph()))) {
+                        return 3.0F;
+                    }
+                }
+            }
+        }
+        return amount;
+    }
+
     @Inject(method = "causeFallDamage", at = @At("HEAD"), cancellable = true)
     private void morphmod$handleHorseJumpFallDamage(float fallDistance, float multiplier, net.minecraft.world.damagesource.DamageSource source, CallbackInfoReturnable<Boolean> cir) {
         LivingEntity self = (LivingEntity) (Object) this;
@@ -86,6 +104,78 @@ public abstract class LivingEntityMixin {
                 double fellBelow = startY - player.getY();
                 if (fellBelow <= 1.5) {
                     cir.setReturnValue(false);
+                }
+            }
+        }
+    }
+
+    @Inject(method = "increaseAirSupply", at = @At("HEAD"), cancellable = true)
+    private void morphmod$preventLandAirIncrease(int currentAir, CallbackInfoReturnable<Integer> cir) {
+        LivingEntity self = (LivingEntity) (Object) this;
+        if (self instanceof ServerPlayer serverPlayer) {
+            MorphManager manager = MorphManager.get(serverPlayer.server);
+            MorphData data = manager.getMorphData(serverPlayer.getUUID());
+            if (data != null && data.isMorphActive()) {
+                ResourceLocation morphId = data.getActiveMorph();
+                EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.get(morphId);
+                if (MorphRegistry.isSuffocatingOnLand(type) && !serverPlayer.isInWaterRainOrBubble()) {
+                    cir.setReturnValue(currentAir);
+                }
+            }
+        }
+    }
+
+    @Inject(method = "canBreatheUnderwater", at = @At("HEAD"), cancellable = true)
+    private void morphmod$canBreatheUnderwater(CallbackInfoReturnable<Boolean> cir) {
+        LivingEntity self = (LivingEntity) (Object) this;
+        if (self instanceof ServerPlayer serverPlayer) {
+            MorphManager manager = MorphManager.get(serverPlayer.server);
+            MorphData data = manager.getMorphData(serverPlayer.getUUID());
+            if (data != null && data.isMorphActive()) {
+                ResourceLocation morphId = data.getActiveMorph();
+                EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.get(morphId);
+                if (type != null && (MorphRegistry.isSuffocatingOnLand(type)
+                        || MorphRegistry.getAbilities(type).contains(MorphAbility.WATER_BREATHING))) {
+                    cir.setReturnValue(true);
+                }
+            }
+        }
+    }
+
+    @Inject(method = "isInWall", at = @At("HEAD"), cancellable = true)
+    private void morphmod$preventVexWallSuffocation(CallbackInfoReturnable<Boolean> cir) {
+        LivingEntity self = (LivingEntity) (Object) this;
+        if (self instanceof ServerPlayer serverPlayer) {
+            if (SilverfishHideHandler.isHidden(serverPlayer.getUUID())) {
+                cir.setReturnValue(false);
+                return;
+            }
+            MorphManager manager = MorphManager.get(serverPlayer.server);
+            MorphData data = manager.getMorphData(serverPlayer.getUUID());
+            if (data != null && data.isMorphActive()) {
+                ResourceLocation morphId = data.getActiveMorph();
+                if (morphId != null && morphId.getPath().equals("vex")) {
+                    cir.setReturnValue(false);
+                }
+            }
+        }
+    }
+
+    @Inject(method = "updateFallFlying", at = @At("HEAD"), cancellable = true)
+    private void morphmod$phantomKeepFallFlying(CallbackInfo ci) {
+        LivingEntity self = (LivingEntity) (Object) this;
+        if (self instanceof ServerPlayer player) {
+            MorphManager manager = MorphManager.get(player.server);
+            MorphData data = manager.getMorphData(player.getUUID());
+            if (data != null && data.isMorphActive()) {
+                ResourceLocation morphId = data.getActiveMorph();
+                if (morphId != null && morphId.getPath().equals("phantom")) {
+                    if (player.isFallFlying()) {
+                        if (player.onGround() || player.isPassenger() || player.hasEffect(net.minecraft.world.effect.MobEffects.LEVITATION)) {
+                            player.stopFallFlying();
+                        }
+                    }
+                    ci.cancel();
                 }
             }
         }

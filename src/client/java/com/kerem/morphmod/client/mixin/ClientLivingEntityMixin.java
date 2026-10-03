@@ -54,4 +54,65 @@ public abstract class ClientLivingEntityMixin {
             }
         }
     }
+
+    @Inject(method = "tick", at = @At("TAIL"))
+    private void morphmod$onClientLivingTick(CallbackInfo ci) {
+        LivingEntity self = (LivingEntity) (Object) this;
+        if (self instanceof Player player && player.level().isClientSide) {
+            if (ClientMorphData.isSilverfishHidden()) {
+                player.noPhysics = true;
+                return;
+            }
+            ResourceLocation morphId = ClientMorphData.getActiveMorph(player.getUUID());
+            if (morphId != null && morphId.getPath().equals("vex")) {
+                player.noPhysics = true;
+                player.resetFallDistance();
+            }
+        }
+    }
+
+    @Inject(method = "increaseAirSupply", at = @At("HEAD"), cancellable = true)
+    private void morphmod$preventClientLandAirIncrease(int currentAir, CallbackInfoReturnable<Integer> cir) {
+        LivingEntity self = (LivingEntity) (Object) this;
+        if (self instanceof Player player && player.level().isClientSide) {
+            ResourceLocation morphId = ClientMorphData.getActiveMorph(player.getUUID());
+            if (morphId != null) {
+                EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.get(morphId);
+                if (MorphRegistry.isSuffocatingOnLand(type) && !player.isInWaterRainOrBubble()) {
+                    cir.setReturnValue(currentAir);
+                }
+            }
+        }
+    }
+
+    @Inject(method = "canBreatheUnderwater", at = @At("HEAD"), cancellable = true)
+    private void morphmod$clientCanBreatheUnderwater(CallbackInfoReturnable<Boolean> cir) {
+        LivingEntity self = (LivingEntity) (Object) this;
+        if (self instanceof Player player && player.level().isClientSide) {
+            ResourceLocation morphId = ClientMorphData.getActiveMorph(player.getUUID());
+            if (morphId != null) {
+                EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.get(morphId);
+                if (type != null && (MorphRegistry.isSuffocatingOnLand(type)
+                        || MorphRegistry.getAbilities(type).contains(MorphAbility.WATER_BREATHING))) {
+                    cir.setReturnValue(true);
+                }
+            }
+        }
+    }
+
+    @Inject(method = "updateFallFlying", at = @At("HEAD"), cancellable = true)
+    private void morphmod$clientPhantomKeepFallFlying(CallbackInfo ci) {
+        LivingEntity self = (LivingEntity) (Object) this;
+        if (self instanceof Player player && player.level().isClientSide) {
+            ResourceLocation morphId = ClientMorphData.getActiveMorph(player.getUUID());
+            if (morphId != null && morphId.getPath().equals("phantom")) {
+                if (player.isFallFlying()) {
+                    if (player.onGround() || player.isPassenger() || player.hasEffect(net.minecraft.world.effect.MobEffects.LEVITATION)) {
+                        player.stopFallFlying();
+                    }
+                }
+                ci.cancel();
+            }
+        }
+    }
 }

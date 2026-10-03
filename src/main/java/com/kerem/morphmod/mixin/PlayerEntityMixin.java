@@ -47,4 +47,43 @@ public abstract class PlayerEntityMixin {
             }
         }
     }
+
+    @Inject(method = "tick", at = @At("TAIL"))
+    private void morphmod$onServerPlayerTick(org.spongepowered.asm.mixin.injection.callback.CallbackInfo ci) {
+        Player self = (Player) (Object) this;
+        if (self instanceof ServerPlayer serverPlayer) {
+            if (com.kerem.morphmod.event.SilverfishHideHandler.isHidden(serverPlayer.getUUID())) {
+                serverPlayer.noPhysics = true;
+                return;
+            }
+            MorphManager manager = MorphManager.get(serverPlayer.server);
+            MorphData data = manager.getMorphData(serverPlayer.getUUID());
+            if (data != null && data.isMorphActive()) {
+                ResourceLocation morphId = data.getActiveMorph();
+                if (morphId != null && morphId.getPath().equals("vex")) {
+                    serverPlayer.noPhysics = true;
+                    serverPlayer.resetFallDistance();
+                }
+            }
+        }
+    }
+
+    @Inject(method = "tryToStartFallFlying", at = @At("HEAD"), cancellable = true)
+    private void morphmod$phantomStartFallFlying(CallbackInfoReturnable<Boolean> cir) {
+        Player self = (Player) (Object) this;
+        if (self instanceof ServerPlayer serverPlayer) {
+            MorphManager manager = MorphManager.get(serverPlayer.server);
+            MorphData data = manager.getMorphData(serverPlayer.getUUID());
+            if (data != null && data.isMorphActive()) {
+                ResourceLocation morphId = data.getActiveMorph();
+                if (morphId != null && morphId.getPath().equals("phantom")) {
+                    if (!self.onGround() && !self.isFallFlying() && !self.isInWater()
+                            && !self.hasEffect(net.minecraft.world.effect.MobEffects.LEVITATION)) {
+                        self.startFallFlying();
+                        cir.setReturnValue(true);
+                    }
+                }
+            }
+        }
+    }
 }

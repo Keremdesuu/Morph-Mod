@@ -40,4 +40,19 @@ public abstract class ClientPlayerEntityMixin {
             }
         }
     }
+
+    @Inject(method = "tryToStartFallFlying", at = @At("HEAD"), cancellable = true)
+    private void morphmod$clientPhantomStartFallFlying(CallbackInfoReturnable<Boolean> cir) {
+        Player self = (Player) (Object) this;
+        if (!self.level().isClientSide) return;
+
+        ResourceLocation morphId = ClientMorphData.getActiveMorph(self.getUUID());
+        if (morphId != null && morphId.getPath().equals("phantom")) {
+            if (!self.onGround() && !self.isFallFlying() && !self.isInWater()
+                    && !self.hasEffect(net.minecraft.world.effect.MobEffects.LEVITATION)) {
+                self.startFallFlying();
+                cir.setReturnValue(true);
+            }
+        }
+    }
 }
