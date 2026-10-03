@@ -27,6 +27,7 @@ public class MorphPackets {
         PayloadTypeRegistry.playC2S().register(ActiveAbilityPayload.TYPE, ActiveAbilityPayload.STREAM_CODEC);
         PayloadTypeRegistry.playS2C().register(MorphSyncPayload.TYPE, MorphSyncPayload.STREAM_CODEC);
         PayloadTypeRegistry.playS2C().register(ActiveMorphUpdatePayload.TYPE, ActiveMorphUpdatePayload.STREAM_CODEC);
+        PayloadTypeRegistry.playS2C().register(SilverfishHiddenPayload.TYPE, SilverfishHiddenPayload.STREAM_CODEC);
 
         // Handle morph requests from clients
         ServerPlayNetworking.registerGlobalReceiver(
@@ -42,7 +43,7 @@ public class MorphPackets {
                 ActiveAbilityPayload.TYPE,
                 (payload, context) -> {
                     ServerPlayer player = context.player();
-                    context.server().execute(() -> com.kerem.morphmod.event.ActiveAbilityHandler.handleAbilityUse(player));
+                    context.server().execute(() -> com.kerem.morphmod.event.ActiveAbilityHandler.handleAbilityUse(player, payload.isSecondary()));
                 }
         );
     }
@@ -79,6 +80,7 @@ public class MorphPackets {
                 EntityType<?> entityType = BuiltInRegistries.ENTITY_TYPE.get(morphId);
                 if (entityType != null) {
                     MorphAbilityHandler.applyMorphHealth(player, entityType);
+                    MorphAbilityHandler.applyMorphSpeed(player, entityType);
                     MorphAbilityHandler.applyAbilities(player, entityType);
                 }
 

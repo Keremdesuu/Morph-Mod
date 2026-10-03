@@ -3,10 +3,12 @@ package com.kerem.morphmod.client.mixin;
 import com.kerem.morphmod.client.ClientMorphData;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.ItemInHandRenderer;
+import net.minecraft.util.Mth;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
@@ -57,18 +59,34 @@ public class ItemInHandRendererMixin {
 
             poseStack.pushPose();
 
-            float sign = humanoidArm == HumanoidArm.RIGHT ? 1.0F : -1.0F;
-            poseStack.translate(sign * 0.56F, -0.52F + equippedProgress * -0.6F, -0.72F);
+            boolean isRight = humanoidArm != HumanoidArm.LEFT;
+            float f = isRight ? 1.0F : -1.0F;
+            float g = Mth.sqrt(swingProgress);
+            float h = -0.3F * Mth.sin(g * (float) Math.PI);
+            float i = 0.4F * Mth.sin(g * (float) (Math.PI * 2));
+            float j = -0.4F * Mth.sin(swingProgress * (float) Math.PI);
+            poseStack.translate(f * (h + 0.64000005F), i + -0.6F + equippedProgress * -0.6F, j + -0.71999997F);
+            poseStack.mulPose(Axis.YP.rotationDegrees(f * 45.0F));
+            float k = Mth.sin(swingProgress * swingProgress * (float) Math.PI);
+            float l = Mth.sin(g * (float) Math.PI);
+            poseStack.mulPose(Axis.YP.rotationDegrees(f * l * 70.0F));
+            poseStack.mulPose(Axis.ZP.rotationDegrees(f * k * -20.0F));
 
-            humanoidModel.attackTime = swingProgress;
+            poseStack.translate(f * -1.0F, 3.6F, 3.5F);
+            poseStack.mulPose(Axis.ZP.rotationDegrees(f * 120.0F));
+            poseStack.mulPose(Axis.XP.rotationDegrees(200.0F));
+            poseStack.mulPose(Axis.YP.rotationDegrees(f * -135.0F));
+            poseStack.translate(f * 5.6F, 0.0F, 0.0F);
+
+            humanoidModel.attackTime = 0.0F;
             humanoidModel.riding = false;
             humanoidModel.young = false;
 
-            ModelPart armPart = humanoidArm == HumanoidArm.RIGHT ? humanoidModel.rightArm : humanoidModel.leftArm;
+            ModelPart armPart = isRight ? humanoidModel.rightArm : humanoidModel.leftArm;
             armPart.resetPose();
             armPart.xRot = 0.0F;
 
-            VertexConsumer consumer = bufferSource.getBuffer(RenderType.entitySolid(texture));
+            VertexConsumer consumer = bufferSource.getBuffer(RenderType.entityCutoutNoCull(texture));
             armPart.render(poseStack, consumer, light, OverlayTexture.NO_OVERLAY);
 
             poseStack.popPose();

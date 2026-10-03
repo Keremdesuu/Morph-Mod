@@ -19,6 +19,8 @@ public enum MorphAbility {
     FIRE_RESISTANCE("fire_resistance"),
     NIGHT_VISION("night_vision"),
     KNOCKBACK_RESIST("knockback_resist"),
+    RESISTANCE("resistance"),
+    STRENGTH("strength"),
 
     // ═══ Size ═══
     SMALL_SIZE("small_size"),

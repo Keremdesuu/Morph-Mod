@@ -21,14 +21,14 @@ public class MorphRegistry {
         //  PASSIVE MOBS
         // ═══════════════════════════════════════════════════════════
         register(EntityType.CHICKEN, 4, ActiveAbility.NONE,
-                MorphAbility.SLOW_FALLING, MorphAbility.NO_FALL_DAMAGE);
+                MorphAbility.NO_FALL_DAMAGE);
         register(EntityType.BAT, 6, ActiveAbility.ECHOLOCATION,
                 MorphAbility.FLIGHT, MorphAbility.SMALL_SIZE);
         register(EntityType.CAT, 10, ActiveAbility.DASH,
                 MorphAbility.SPEED_BOOST, MorphAbility.NO_FALL_DAMAGE);
         register(EntityType.WOLF, 8, ActiveAbility.DASH,
                 MorphAbility.SPEED_BOOST);
-        register(EntityType.HORSE, 30, ActiveAbility.DASH);
+        register(EntityType.HORSE, 30, ActiveAbility.HORSE_JUMP);
         register(EntityType.DONKEY, 15, ActiveAbility.DASH);
         register(EntityType.MULE, 15, ActiveAbility.DASH);
         register(EntityType.PIG, 10, ActiveAbility.NONE);
@@ -52,7 +52,7 @@ public class MorphRegistry {
         register(EntityType.LLAMA, 22, ActiveAbility.SPIT);
         register(EntityType.MOOSHROOM, 10, ActiveAbility.SELF_HEAL);
         register(EntityType.PANDA, 20, ActiveAbility.SNEEZE);
-        register(EntityType.POLAR_BEAR, 30, ActiveAbility.GROUND_SLAM);
+        register(EntityType.POLAR_BEAR, 30, ActiveAbility.NONE);
         register(EntityType.BEE, 10, ActiveAbility.NONE,
                 MorphAbility.FLIGHT, MorphAbility.SMALL_SIZE, MorphAbility.POISON_STRIKE);
 
@@ -92,9 +92,9 @@ public class MorphRegistry {
         register(EntityType.SKELETON, 20, ActiveAbility.SHOOT_ARROW,
                 MorphAbility.SUN_DAMAGE);
         register(EntityType.CREEPER, 20, ActiveAbility.EXPLODE);
-        register(EntityType.SPIDER, 16, ActiveAbility.SHOOT_WEB,
+        register(EntityType.SPIDER, 16, ActiveAbility.NONE,
                 MorphAbility.WALL_CLIMBING);
-        register(EntityType.CAVE_SPIDER, 12, ActiveAbility.SHOOT_WEB,
+        register(EntityType.CAVE_SPIDER, 12, ActiveAbility.NONE,
                 MorphAbility.WALL_CLIMBING, MorphAbility.POISON_STRIKE);
         register(EntityType.ENDERMAN, 40, ActiveAbility.TELEPORT_LOOK);
         register(EntityType.BLAZE, 20, ActiveAbility.SHOOT_FIRE_CHARGE,
@@ -105,23 +105,23 @@ public class MorphRegistry {
                 MorphAbility.FLIGHT);
         register(EntityType.WITHER_SKELETON, 20, ActiveAbility.NONE,
                 MorphAbility.FIRE_RESISTANCE, MorphAbility.WITHER_STRIKE);
-        register(EntityType.PIGLIN, 16, ActiveAbility.SHOOT_ARROW);
-        register(EntityType.PIGLIN_BRUTE, 50, ActiveAbility.GROUND_SLAM,
-                MorphAbility.KNOCKBACK_RESIST);
+        register(EntityType.PIGLIN, 16, ActiveAbility.NONE);
+        register(EntityType.PIGLIN_BRUTE, 50, ActiveAbility.NONE,
+                MorphAbility.KNOCKBACK_RESIST, MorphAbility.RESISTANCE, MorphAbility.STRENGTH);
         register(EntityType.HOGLIN, 40, ActiveAbility.CHARGE);
-        register(EntityType.ZOGLIN, 40, ActiveAbility.CHARGE);
+        register(EntityType.ZOGLIN, 40, ActiveAbility.NONE);
         register(EntityType.ZOMBIFIED_PIGLIN, 20, ActiveAbility.NONE,
                 MorphAbility.FIRE_RESISTANCE);
         register(EntityType.MAGMA_CUBE, 16, ActiveAbility.NONE,
                 MorphAbility.FIRE_RESISTANCE);
         register(EntityType.SLIME, 16, ActiveAbility.NONE,
-                MorphAbility.JUMP_BOOST);
+                MorphAbility.JUMP_BOOST, MorphAbility.NO_FALL_DAMAGE);
         register(EntityType.WITCH, 26, ActiveAbility.THROW_POTION);
         register(EntityType.PILLAGER, 24, ActiveAbility.SHOOT_ARROW);
-        register(EntityType.VINDICATOR, 24, ActiveAbility.CHARGE);
+        register(EntityType.VINDICATOR, 24, ActiveAbility.NONE);
         register(EntityType.RAVAGER, 100, ActiveAbility.ROAR,
                 MorphAbility.KNOCKBACK_RESIST);
-        register(EntityType.VEX, 14, ActiveAbility.DASH,
+        register(EntityType.VEX, 14, ActiveAbility.NONE,
                 MorphAbility.FLIGHT, MorphAbility.SMALL_SIZE);
         register(EntityType.EVOKER, 24, ActiveAbility.SUMMON_FANGS);
         register(EntityType.DROWNED, 20, ActiveAbility.THROW_TRIDENT,
@@ -130,8 +130,8 @@ public class MorphRegistry {
                 MorphAbility.HUNGER_STRIKE);
         register(EntityType.STRAY, 20, ActiveAbility.SHOOT_ARROW,
                 MorphAbility.SUN_DAMAGE, MorphAbility.SLOW_STRIKE);
-        register(EntityType.SHULKER, 30, ActiveAbility.SHULKER_BULLET);
-        register(EntityType.SILVERFISH, 8, ActiveAbility.DASH,
+        register(EntityType.SHULKER, 30, ActiveAbility.SHULKER_TELEPORT, ActiveAbility.SHULKER_BULLET);
+        register(EntityType.SILVERFISH, 8, ActiveAbility.INFEST_BLOCK,
                 MorphAbility.SMALL_SIZE);
         register(EntityType.ENDERMITE, 8, ActiveAbility.NONE,
                 MorphAbility.SMALL_SIZE);
@@ -164,11 +164,18 @@ public class MorphRegistry {
                 MorphAbility.FLIGHT);
         register(EntityType.WITHER, 300, ActiveAbility.WITHER_SKULL,
                 MorphAbility.FLIGHT, MorphAbility.FIRE_RESISTANCE);
+
+        initSpeeds();
     }
 
     private static void register(EntityType<?> type, int health, ActiveAbility activeAbility,
                                  MorphAbility... passiveAbilities) {
-        REGISTRY.put(type, new MorphEntry(health, Set.of(passiveAbilities), activeAbility));
+        REGISTRY.put(type, new MorphEntry(health, Set.of(passiveAbilities), activeAbility, ActiveAbility.NONE));
+    }
+
+    private static void register(EntityType<?> type, int health, ActiveAbility primaryAbility, ActiveAbility secondaryAbility,
+                                 MorphAbility... passiveAbilities) {
+        REGISTRY.put(type, new MorphEntry(health, Set.of(passiveAbilities), primaryAbility, secondaryAbility));
     }
 
     /**
@@ -216,11 +223,75 @@ public class MorphRegistry {
 
     public static ActiveAbility getActiveAbility(EntityType<?> type) {
         MorphEntry entry = REGISTRY.get(type);
-        return entry != null ? entry.activeAbility() : ActiveAbility.NONE;
+        return entry != null ? entry.primaryAbility() : ActiveAbility.NONE;
+    }
+
+    public static ActiveAbility getSecondaryAbility(EntityType<?> type) {
+        MorphEntry entry = REGISTRY.get(type);
+        return entry != null ? entry.secondaryAbility() : ActiveAbility.NONE;
+    }
+
+    private static final Map<EntityType<?>, Float> SPEED_REGISTRY = new HashMap<>();
+
+    public static float getSpeed(EntityType<?> type) {
+        return SPEED_REGISTRY.getOrDefault(type, 0.10F);
+    }
+
+    private static void setSpeed(EntityType<?> type, float speed) {
+        SPEED_REGISTRY.put(type, speed);
+    }
+
+    private static void initSpeeds() {
+        setSpeed(EntityType.TURTLE, 0.045F);
+        setSpeed(EntityType.IRON_GOLEM, 0.075F);
+        setSpeed(EntityType.SNIFFER, 0.07F);
+        setSpeed(EntityType.PANDA, 0.075F);
+        setSpeed(EntityType.POLAR_BEAR, 0.085F);
+        setSpeed(EntityType.WARDEN, 0.085F);
+        setSpeed(EntityType.SLIME, 0.07F);
+        setSpeed(EntityType.MAGMA_CUBE, 0.07F);
+        setSpeed(EntityType.PUFFERFISH, 0.035F);
+        setSpeed(EntityType.COD, 0.035F);
+        setSpeed(EntityType.SALMON, 0.035F);
+        setSpeed(EntityType.TADPOLE, 0.035F);
+        setSpeed(EntityType.TROPICAL_FISH, 0.035F);
+        setSpeed(EntityType.CHICKEN, 0.09F);
+        setSpeed(EntityType.SHEEP, 0.09F);
+        setSpeed(EntityType.COW, 0.09F);
+        setSpeed(EntityType.MOOSHROOM, 0.09F);
+        setSpeed(EntityType.PIG, 0.09F);
+        setSpeed(EntityType.ZOMBIE, 0.095F);
+        setSpeed(EntityType.HUSK, 0.095F);
+        setSpeed(EntityType.DROWNED, 0.095F);
+        setSpeed(EntityType.SKELETON, 0.10F);
+        setSpeed(EntityType.STRAY, 0.10F);
+        setSpeed(EntityType.WITHER_SKELETON, 0.10F);
+        setSpeed(EntityType.CREEPER, 0.10F);
+        setSpeed(EntityType.SPIDER, 0.115F);
+        setSpeed(EntityType.CAVE_SPIDER, 0.115F);
+        setSpeed(EntityType.WOLF, 0.115F);
+        setSpeed(EntityType.CAT, 0.12F);
+        setSpeed(EntityType.OCELOT, 0.12F);
+        setSpeed(EntityType.FOX, 0.12F);
+        setSpeed(EntityType.RABBIT, 0.115F);
+        setSpeed(EntityType.HORSE, 0.135F);
+        setSpeed(EntityType.DONKEY, 0.115F);
+        setSpeed(EntityType.MULE, 0.115F);
+        setSpeed(EntityType.CAMEL, 0.11F);
+        setSpeed(EntityType.SILVERFISH, 0.12F);
+        setSpeed(EntityType.ENDERMAN, 0.12F);
+        setSpeed(EntityType.SHULKER, 0.0F);
     }
 
     /**
-     * A morph registration entry containing health, passive abilities, and active ability.
+     * A morph registration entry containing health, passive abilities, and active abilities.
      */
-    public record MorphEntry(int health, Set<MorphAbility> passiveAbilities, ActiveAbility activeAbility) {}
+    public record MorphEntry(int health, Set<MorphAbility> passiveAbilities, ActiveAbility primaryAbility, ActiveAbility secondaryAbility) {
+        public MorphEntry(int health, Set<MorphAbility> passiveAbilities, ActiveAbility activeAbility) {
+            this(health, passiveAbilities, activeAbility, ActiveAbility.NONE);
+        }
+        public ActiveAbility activeAbility() {
+            return primaryAbility;
+        }
+    }
 }

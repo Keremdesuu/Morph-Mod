@@ -55,11 +55,21 @@ public class ActiveAbilityHandler {
     //  ACTIVE ABILITY ACTIVATION
     // ═══════════════════════════════════════════════════════════════
 
+    private static final Map<UUID, Double> horseJumpStartPositions = new HashMap<>();
+
+    public static Double getHorseJumpStartY(UUID uuid) {
+        return horseJumpStartPositions.remove(uuid);
+    }
+
+    public static void handleAbilityUse(ServerPlayer player) {
+        handleAbilityUse(player, false);
+    }
+
     /**
-     * Called when a player presses the ability key.
+     * Called when a player presses the primary (G) or secondary (H) ability key.
      * Validates the morph, checks cooldown, and executes the ability.
      */
-    public static void handleAbilityUse(ServerPlayer player) {
+    public static void handleAbilityUse(ServerPlayer player, boolean isSecondary) {
         MorphManager manager = MorphManager.get(player.server);
         MorphData data = manager.getMorphData(player.getUUID());
         if (data == null || !data.isMorphActive()) return;
@@ -69,13 +79,14 @@ public class ActiveAbilityHandler {
         if (entityType == null) return;
 
         MorphRegistry.MorphEntry entry = MorphRegistry.getEntry(entityType);
-        if (entry == null || entry.activeAbility() == ActiveAbility.NONE) {
+        if (entry == null) return;
+
+        ActiveAbility ability = isSecondary ? entry.secondaryAbility() : entry.primaryAbility();
+        if (ability == null || ability == ActiveAbility.NONE) {
             player.displayClientMessage(
-                    Component.translatable("morphmod.ability.none"), true);
+                    Component.translatable(isSecondary ? "morphmod.ability.no_secondary" : "morphmod.ability.none"), true);
             return;
         }
-
-        ActiveAbility ability = entry.activeAbility();
 
         // Check cooldown
         if (isOnCooldown(player, ability)) {
@@ -128,6 +139,7 @@ public class ActiveAbilityHandler {
 
             // Movement
             case TELEPORT_LOOK -> teleportLook(player, level);
+            case SHULKER_TELEPORT -> shulkerTeleport(player, level);
             case INK_DASH -> inkDash(player, level);
             case RAM -> ram(player, level);
             case DOLPHIN_LEAP -> dolphinLeap(player, level);
@@ -135,11 +147,13 @@ public class ActiveAbilityHandler {
             case DASH -> dash(player, level);
             case CHARGE -> charge(player, level);
             case POUNCE -> pounce(player, level);
+            case HORSE_JUMP -> horseJump(player, level);
 
             // Defensive
             case SHELL_DEFENSE -> shellDefense(player, level);
             case PLAY_DEAD -> playDead(player, level);
             case CURL_UP -> curlUp(player, level);
+            case INFEST_BLOCK -> SilverfishHideHandler.toggleHide(player, level);
 
             // Utility
             case SELF_HEAL -> selfHeal(player, level);
@@ -163,12 +177,24 @@ public class ActiveAbilityHandler {
         return true;
     }
 
-    /** Blaze — shoots a small fireball */
+    /** Blaze — shoots a burst of 3 fire charges */
     private static boolean shootFireCharge(ServerPlayer player, ServerLevel level) {
         Vec3 look = player.getLookAngle();
-        SmallFireball fireball = new SmallFireball(level, player, look);
-        fireball.setPos(player.getX() + look.x, player.getEyeY() - 0.1, player.getZ() + look.z);
-        level.addFreshEntity(fireball);
+        Vec3 right = new Vec3(-look.z, 0, look.x).normalize();
+
+        double[][] offsets = {
+                {0.0, 0.0},
+                {-0.15, 0.03},
+                {0.15, 0.03}
+        };
+
+        for (double[] offset : offsets) {
+            Vec3 dir = look.add(right.scale(offset[0])).add(0, offset[1], 0).normalize();
+            SmallFireball fireball = new SmallFireball(level, player, dir);
+            fireball.setPos(player.getX() + dir.x * 1.2, player.getEyeY() - 0.1, player.getZ() + dir.z * 1.2);
+            level.addFreshEntity(fireball);
+        }
+
         playSound(level, player, SoundEvents.BLAZE_SHOOT);
         return true;
     }
@@ -484,6 +510,37 @@ public class ActiveAbilityHandler {
         return true;
     }
 
+    /** Shulker — teleports to targeted block within 30 blocks */
+    private static boolean shulkerTeleport(ServerPlayer player, ServerLevel level) {
+        HitResult hit = player.pick(30.0, 0.0F, false);
+        if (hit.getType() != HitResult.Type.BLOCK) {
+            player.displayClientMessage(Component.literal("§cIşınlanmak için bir bloğa bakmalısın!"), true);
+            return false;
+        }
+
+        BlockHitResult blockHit = (BlockHitResult) hit;
+        BlockPos targetPos = blockHit.getBlockPos().relative(blockHit.getDirection());
+
+        // Check if there is space for the player
+        if (!level.getBlockState(targetPos).canBeReplaced() && !level.getBlockState(targetPos).isAir()) {
+            return false;
+        }
+
+        double oldX = player.getX(), oldY = player.getY(), oldZ = player.getZ();
+
+        player.teleportTo(targetPos.getX() + 0.5, targetPos.getY(), targetPos.getZ() + 0.5);
+        player.resetFallDistance();
+        player.setDeltaMovement(Vec3.ZERO);
+
+        playSound(level, player, SoundEvents.SHULKER_TELEPORT);
+        level.playSound(null, oldX, oldY, oldZ, SoundEvents.SHULKER_TELEPORT, SoundSource.PLAYERS, 1.0F, 1.0F);
+
+        level.sendParticles(ParticleTypes.PORTAL, oldX, oldY + 0.5, oldZ, 20, 0.3, 0.3, 0.3, 0.1);
+        level.sendParticles(ParticleTypes.PORTAL, targetPos.getX() + 0.5, targetPos.getY() + 0.5, targetPos.getZ() + 0.5, 20, 0.3, 0.3, 0.3, 0.1);
+
+        return true;
+    }
+
     /** Squid, Glow Squid — squirts ink (blinds nearby enemies) and dashes forward */
     private static boolean inkDash(ServerPlayer player, ServerLevel level) {
         // Blind nearby entities
@@ -571,6 +628,20 @@ public class ActiveAbilityHandler {
         return true;
     }
 
+    /** Horse — powerful jump leap */
+    private static boolean horseJump(ServerPlayer player, ServerLevel level) {
+        horseJumpStartPositions.put(player.getUUID(), player.getY());
+        Vec3 look = player.getLookAngle();
+        player.setDeltaMovement(look.x * 0.8, 0.85, look.z * 0.8);
+        player.hasImpulse = true;
+        player.hurtMarked = true;
+        playSound(level, player, SoundEvents.HORSE_JUMP);
+        level.sendParticles(ParticleTypes.CLOUD,
+                player.getX(), player.getY(), player.getZ(),
+                15, 0.4, 0.1, 0.4, 0.05);
+        return true;
+    }
+
     /** Hoglin, Zoglin, Vindicator — charges forward dealing heavy damage */
     private static boolean charge(ServerPlayer player, ServerLevel level) {
         Vec3 look = player.getLookAngle();
@@ -587,13 +658,35 @@ public class ActiveAbilityHandler {
         return true;
     }
 
-    /** Fox — pounces forward and upward */
+    /** Fox — leaps high into the air and strikes target mob */
     private static boolean pounce(ServerPlayer player, ServerLevel level) {
+        LivingEntity target = findLookTarget(player, 12.0);
         Vec3 look = player.getLookAngle();
-        player.push(look.x * 1.5, 0.8, look.z * 1.5);
-        player.hurtMarked = true;
 
-        playSound(level, player, SoundEvents.FOX_SCREECH);
+        if (target != null) {
+            Vec3 diff = target.position().subtract(player.position());
+            Vec3 horiz = new Vec3(diff.x, 0, diff.z).normalize();
+            double dist = Math.min(diff.horizontalDistance(), 10.0);
+            double speed = dist * 0.16 + 0.35;
+            player.setDeltaMovement(horiz.x * speed, 0.72, horiz.z * speed);
+            player.hasImpulse = true;
+            player.hurtMarked = true;
+
+            // Damage and strike target
+            target.hurt(player.damageSources().mobAttack(player), 7.0F);
+            target.push(horiz.x * 0.4, 0.2, horiz.z * 0.4);
+            target.hurtMarked = true;
+
+            level.sendParticles(ParticleTypes.CRIT, target.getX(), target.getEyeY(), target.getZ(),
+                    15, 0.3, 0.3, 0.3, 0.15);
+            playSound(level, player, SoundEvents.FOX_BITE);
+            playSound(level, player, SoundEvents.FOX_SCREECH);
+        } else {
+            player.setDeltaMovement(look.x * 1.3, 0.72, look.z * 1.3);
+            player.hasImpulse = true;
+            player.hurtMarked = true;
+            playSound(level, player, SoundEvents.FOX_SCREECH);
+        }
         return true;
     }
 

@@ -325,12 +325,19 @@ public class MorphScreen extends Screen {
                     if (entry != null) {
                         tooltip.add(Component.literal("❤ " + (entry.health() / 2) + " Hearts")
                                 .withStyle(style -> style.withColor(0xFF5555)));
-                        if (entry.activeAbility() != null && entry.activeAbility() != com.kerem.morphmod.morph.ActiveAbility.NONE) {
-                            String activeName = entry.activeAbility().getId().replace("_", " ");
+                        if (entry.primaryAbility() != null && entry.primaryAbility() != com.kerem.morphmod.morph.ActiveAbility.NONE) {
+                            String activeName = entry.primaryAbility().getId().replace("_", " ");
                             String activeStr = "✦ [G] " + activeName
-                                    + " (" + String.format("%.1fs", entry.activeAbility().getCooldownSeconds()) + ")";
+                                    + " (" + String.format("%.1fs", entry.primaryAbility().getCooldownSeconds()) + ")";
                             tooltip.add(Component.literal(activeStr)
                                     .withStyle(style -> style.withColor(0xFFAA00)));
+                        }
+                        if (entry.secondaryAbility() != null && entry.secondaryAbility() != com.kerem.morphmod.morph.ActiveAbility.NONE) {
+                            String secName = entry.secondaryAbility().getId().replace("_", " ");
+                            String secStr = "✦ [H] " + secName
+                                    + " (" + String.format("%.1fs", entry.secondaryAbility().getCooldownSeconds()) + ")";
+                            tooltip.add(Component.literal(secStr)
+                                    .withStyle(style -> style.withColor(0xFF88AA)));
                         }
                         if (!entry.passiveAbilities().isEmpty()) {
                             StringBuilder abilitiesStr = new StringBuilder("⚡ ");

@@ -8,11 +8,13 @@
     "morphmod.screen.search_hint": "Search mob name...",
     "morphmod.screen.no_results": "§cNo matching mob found!",
     "morphmod.ability.none": "§cThis mob has no active ability!",
+    "morphmod.ability.no_secondary": "§cThis mob has no secondary ability!",
     "morphmod.ability.cooldown": "§eAbility on cooldown: %ss",
     "morphmod.ability.no_target": "§cNo target in sight!",
     "morphmod.command.all_success": "§a[Morph Mod] Unlocked all morphs for %s! (%d morphs)",
     "morphmod.command.all_multiple_success": "§a[Morph Mod] Unlocked all morphs for %d players! (%d morphs)",
     "key.morphmod.open_menu": "Open Morph Menu",
-    "key.morphmod.active_ability": "Use Active Ability",
+    "key.morphmod.active_ability": "Use Primary Ability",
+    "key.morphmod.secondary_ability": "Use Secondary Ability",
     "category.morphmod.general": "Morph Mod"
 }

@@ -7,6 +7,7 @@ import com.kerem.morphmod.morph.MorphManager;
 import com.kerem.morphmod.morph.MorphRegistry;
 import com.kerem.morphmod.network.MorphPackets;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -49,8 +50,21 @@ public class MorphMod implements ModInitializer {
                     EntityType<?> entityType = BuiltInRegistries.ENTITY_TYPE.get(morphId);
                     if (entityType != null) {
                         MorphAbilityHandler.applyMorphHealth(player, entityType);
+                        MorphAbilityHandler.applyMorphSpeed(player, entityType);
                     }
                 }
+            });
+        });
+
+        // Reset to normal form on death and respawn
+        ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) -> {
+            newPlayer.server.execute(() -> {
+                MorphManager manager = MorphManager.get(newPlayer.server);
+                manager.clearActiveMorph(newPlayer.getUUID());
+                MorphAbilityHandler.resetAbilities(newPlayer);
+                newPlayer.refreshDimensions();
+                MorphPackets.broadcastMorphUpdate(newPlayer, "");
+                MorphPackets.syncMorphData(newPlayer);
             });
         });
 

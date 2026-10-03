@@ -42,6 +42,16 @@ public class ClientMorphData {
         return activeMorph;
     }
 
+    private static boolean silverfishHidden = false;
+
+    public static void setSilverfishHidden(boolean hidden) {
+        silverfishHidden = hidden;
+    }
+
+    public static boolean isSilverfishHidden() {
+        return silverfishHidden;
+    }
+
     // ─── Other Players' Active Morphs ────────────────────────────
 
     public static void setOtherPlayerMorph(UUID playerId, String morphId) {
@@ -98,5 +108,6 @@ public class ClientMorphData {
         activeMorph = null;
         otherPlayerMorphs.clear();
         fakeEntityCache.clear();
+        silverfishHidden = false;
     }
 }

@@ -17,6 +17,7 @@ import org.lwjgl.glfw.GLFW;
 public class MorphKeyBindings {
     private static KeyMapping morphMenuKey;
     private static KeyMapping activeAbilityKey;
+    private static KeyMapping secondaryAbilityKey;
 
     public static void register() {
         // Register Morph menu key binding
@@ -27,11 +28,19 @@ public class MorphKeyBindings {
                 "category.morphmod.general"          // Category translation key
         ));
 
-        // Register Active ability key binding
+        // Register Primary active ability key binding (G)
         activeAbilityKey = KeyBindingHelper.registerKeyBinding(new KeyMapping(
                 "key.morphmod.active_ability",       // Translation key
                 InputConstants.Type.KEYSYM,          // Input type
                 GLFW.GLFW_KEY_G,                     // Default key: G
+                "category.morphmod.general"          // Category translation key
+        ));
+
+        // Register Secondary active ability key binding (H)
+        secondaryAbilityKey = KeyBindingHelper.registerKeyBinding(new KeyMapping(
+                "key.morphmod.secondary_ability",    // Translation key
+                InputConstants.Type.KEYSYM,          // Input type
+                GLFW.GLFW_KEY_H,                     // Default key: H
                 "category.morphmod.general"          // Category translation key
         ));
 
@@ -45,9 +54,16 @@ public class MorphKeyBindings {
             }
 
             while (activeAbilityKey.consumeClick()) {
-                // Trigger active ability
+                // Trigger primary active ability
                 if (client.player != null && client.screen == null) {
-                    ClientPlayNetworking.send(new ActiveAbilityPayload());
+                    ClientPlayNetworking.send(new ActiveAbilityPayload(false));
+                }
+            }
+
+            while (secondaryAbilityKey.consumeClick()) {
+                // Trigger secondary active ability
+                if (client.player != null && client.screen == null) {
+                    ClientPlayNetworking.send(new ActiveAbilityPayload(true));
                 }
             }
         });

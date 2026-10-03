@@ -10,15 +10,18 @@ import net.minecraft.resources.ResourceLocation;
  * morph's active ability. No data is needed — the server determines
  * the ability from the player's current morph.
  */
-public record ActiveAbilityPayload() implements CustomPacketPayload {
+public record ActiveAbilityPayload(boolean isSecondary) implements CustomPacketPayload {
+    public ActiveAbilityPayload() {
+        this(false);
+    }
 
     public static final CustomPacketPayload.Type<ActiveAbilityPayload> TYPE =
             new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath("morphmod", "active_ability"));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, ActiveAbilityPayload> STREAM_CODEC =
             StreamCodec.of(
-                    (buf, payload) -> { /* no data to write */ },
-                    buf -> new ActiveAbilityPayload()
+                    (buf, payload) -> buf.writeBoolean(payload.isSecondary()),
+                    buf -> new ActiveAbilityPayload(buf.readBoolean())
             );
 
     @Override

@@ -8,11 +8,13 @@
     "morphmod.screen.search_hint": "Mob ismi ara...",
     "morphmod.screen.no_results": "§cEşleşen mob bulunamadı!",
     "morphmod.ability.none": "§cBu mobun aktif bir yeteneği yok!",
+    "morphmod.ability.no_secondary": "§cBu mobun ikincil bir yeteneği yok!",
     "morphmod.ability.cooldown": "§eYetenek bekleme süresinde: %s sn",
     "morphmod.ability.no_target": "§cGörüş alanında hedef yok!",
     "morphmod.command.all_success": "§a[Morph Mod] %s adlı oyuncuya tüm moblar eklendi! (%d mob)",
     "morphmod.command.all_multiple_success": "§a[Morph Mod] %d oyuncuya tüm moblar eklendi! (%d mob)",
     "key.morphmod.open_menu": "Dönüşüm Menüsünü Aç",
-    "key.morphmod.active_ability": "Aktif Yeteneği Kullan",
+    "key.morphmod.active_ability": "Birincil Yeteneği Kullan",
+    "key.morphmod.secondary_ability": "İkincil Yeteneği Kullan",
     "category.morphmod.general": "Morph Mod"
 }

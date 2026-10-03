@@ -9,7 +9,7 @@ public enum ActiveAbility {
 
     // ═══ Projectile Attacks ═══
     SHOOT_ARROW("shoot_arrow", 15),
-    SHOOT_FIRE_CHARGE("shoot_fire_charge", 30),
+    SHOOT_FIRE_CHARGE("shoot_fire_charge", 60),
     SHOOT_LARGE_FIREBALL("shoot_large_fireball", 60),
     DRAGON_FIREBALL("dragon_fireball", 80),
     WITHER_SKULL("wither_skull", 40),
@@ -33,6 +33,7 @@ public enum ActiveAbility {
 
     // ═══ Movement Abilities ═══
     TELEPORT_LOOK("teleport_look", 15),
+    SHULKER_TELEPORT("shulker_teleport", 15),
     INK_DASH("ink_dash", 25),
     RAM("ram", 60),
     DOLPHIN_LEAP("dolphin_leap", 15),
@@ -40,11 +41,13 @@ public enum ActiveAbility {
     DASH("dash", 25),
     CHARGE("charge", 40),
     POUNCE("pounce", 20),
+    HORSE_JUMP("horse_jump", 30),
 
     // ═══ Defensive Abilities ═══
     SHELL_DEFENSE("shell_defense", 100),
     PLAY_DEAD("play_dead", 200),
     CURL_UP("curl_up", 80),
+    INFEST_BLOCK("infest_block", 20),
 
     // ═══ Utility Abilities ═══
     SELF_HEAL("self_heal", 200),

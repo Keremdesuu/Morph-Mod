@@ -5,9 +5,16 @@
     "client": [
         "EntityRenderDispatcherMixin",
         "ClientPlayerEntityMixin",
+        "ClientLivingEntityMixin",
         "WalkAnimationStateAccessor",
+        "IronGolemAccessor",
+        "ShulkerRendererMixin",
         "ItemInHandRendererMixin",
-        "GameRendererMixin"
+        "GameRendererMixin",
+        "ScreenEffectRendererMixin",
+        "EntityAccessor",
+        "RabbitAccessor",
+        "GuardianAccessor"
     ],
     "injectors": {
         "defaultRequire": 1
